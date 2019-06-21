@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ge.mybatis.mapper.TableSchemaMapper">
+    <resultMap id="BaseResultMap" type="com.ge.mybatis.entity.TableSchemaPo">
+        <result column="data_type" javaType="STRING" property="dataType"/>
+        <result column="column_name" javaType="STRING" property="columnName"/>
+        <result column="column_comment" javaType="STRING" property="columnComment"/>
+    </resultMap>
+    <select id="select" resultMap="BaseResultMap">
+        select `data_type`, `column_name`, `column_comment` FROM information_schema.columns where table_name = 'ge'
+    </select>
+</mapper>
