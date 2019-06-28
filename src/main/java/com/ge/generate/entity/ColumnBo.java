@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
+ *
  * @author dengzhipeng
  * @date 2019/06/21
  */
@@ -19,7 +20,7 @@ public class ColumnBo {
      */
     private String javaType;
     /**
-     * java所在包
+     * java所在包,此字段为空，说明是 java.lang 下的包
      */
     private String javaPackage;
     /**
@@ -27,7 +28,7 @@ public class ColumnBo {
      */
     private String comment;
     /**
-     * jdpc字段名
+     * jdbc字段名
      */
     private String jdbcName;
 
