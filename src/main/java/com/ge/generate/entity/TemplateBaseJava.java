@@ -18,18 +18,6 @@ public class TemplateBaseJava{
      */
     private String packageName;
     /**
-     * 作者
-     */
-    private String author;
-    /**
-     * 日期
-     */
-    private String date;
-    /**
-     * 版本号
-     */
-    private String version;
-    /**
      * 需要导入的java包
      */
     private List<String> importJavapackage;
@@ -37,6 +25,10 @@ public class TemplateBaseJava{
      * 存储的字段信息
      */
     private List<ColumnBo> columnBos;
+    /**
+     * 公共属性
+     */
+    private CommonPropertyBo commonProperty;
 
     public TemplateBaseJava(){
         // 读取配置属性
