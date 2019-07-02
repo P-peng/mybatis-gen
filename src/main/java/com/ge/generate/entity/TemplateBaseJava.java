@@ -14,6 +14,10 @@ import java.util.List;
 @Setter
 public class TemplateBaseJava{
     /**
+     * 文件名
+     */
+    private String fileName;
+    /**
      * 包名
      */
     private String packageName;

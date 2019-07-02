@@ -15,11 +15,27 @@ public class CommonPropertyBo {
      */
     private String author;
     /**
-     * 日期
-     */
-    private String date;
-    /**
      * 版本号
      */
     private String version;
+    /**
+     * 模块路径
+     */
+    private String modulePath;
+    /**
+     * 包路径
+     */
+    private String packagePath;
+    /**
+     * 表名
+     */
+    private String tableName;
+    /**
+     * 包下模块名字(模块的包名)，已经存在的模块包(文件夹)不会删除
+     */
+    private String moduleName;
+    /**
+     * 日期
+     */
+    private String date;
 }
