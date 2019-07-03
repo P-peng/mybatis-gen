@@ -34,7 +34,5 @@ public class TemplateBaseJava{
      */
     private CommonPropertyBo commonProperty;
 
-    public TemplateBaseJava(){
-        // 读取配置属性
-    }
+    public TemplateBaseJava(){}
 }

@@ -20,7 +20,7 @@ public class ColumnBo {
      */
     private String javaType;
     /**
-     * java所在包,此字段为空，说明是 java.lang 下的包
+     * java所在包
      */
     private String javaPackage;
     /**
