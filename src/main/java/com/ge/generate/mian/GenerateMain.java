@@ -1,6 +1,5 @@
 package com.ge.generate.mian;
 
-import com.ge.generate.constant.GenerateConstant;
 import com.ge.generate.entity.*;
 import com.ge.generate.utils.MysqlUtil;
 import com.ge.generate.utils.ReadPropertiesUtil;
@@ -29,6 +28,7 @@ import java.util.List;
 public class GenerateMain {
     private static String templateBaseJavaPath = "./src/main/resources/template/TemplateBaseJava.java";
     private static String templateJavaPath = "./src/main/resources/template/TemplateJava.java";
+    private static String templateBaseMapperPath = "./src/main/resources/template/TemplateBaseMapper.java";
 
     public static void main(String[] args){
         GenerateMain main = new GenerateMain();
@@ -66,18 +66,44 @@ public class GenerateMain {
         // 父类包名和名字
         templateJava.setFatherName(templateBaseJava.getFileName());
         templateJava.setFatherPackage(templateBaseJava.getPackageName() + "." + templateBaseJava.getFileName());
-        templateJava.setCommonProperty(templateBaseJava.getCommonProperty());
+        templateJava.setCommonProperty(commonProperty);
         generateJava(templateJava);
 
-        // 生成基础base mapper.xml文件
+        // 生成基础 base mapper.java 和 base mapper.xml文件
+        TemplateBaseMapper templateBaseMapper = new TemplateBaseMapper();
+        // 读取BaseCrudMapper接口所在的包地址
+        templateBaseMapper.setFatherPackage(ReadPropertiesUtil.readByName("baseCrudMapperPath"));
+        templateBaseMapper.setCommonProperty(commonProperty);
+        generateBaseMapperAndBaseMapperXml(templateBaseMapper, null);
     }
 
 
-
     /**
-     * 生成基础mapper文件
+     * 生成生成基础 base mapper.java 和 base mapper.xml文件
+     * @param templateBaseMapper
+     * @param templateBaseMapperBo
      */
-    public void generateBaseMapper(TemplateBaseMapperBo templateBaseMapperBo){
+    public void generateBaseMapperAndBaseMapperXml(TemplateBaseMapper templateBaseMapper, TemplateBaseMapperBo templateBaseMapperBo) throws IOException, TemplateException {
+        /**** 生成base mapper java文件 start ****/
+        String fileName = StringUtil.underlineToHump(StringUtil.toUpperCaseFirstOne(templateBaseMapper.getCommonProperty().getTableName()));
+        templateBaseMapper.setFileName("Base" + fileName + "Mapper");
+        templateBaseMapper.setPackageName(assemblyPackageName(templateBaseMapper.getCommonProperty()) + ".mapper.base");
+        // 要生成java文件所在的全相对地址
+        String fileFullName = templateBaseMapper.getCommonProperty().getModulePath() + "/java/"
+                + templateBaseMapper.getPackageName().replace(".", "/") + "/" + templateBaseMapper.getFileName() + ".java";
+        Version version = new Version("2.3.0");
+        Configuration config = new Configuration(version);
+        Template template = config.getTemplate(templateBaseMapperPath);
+        String targetFile = MessageFormat.format(fileFullName, fileFullName);
+        File file = new File(targetFile);
+        File parentFile = file.getParentFile();
+        // 创建文件目录
+        if (!parentFile.exists()) {
+            parentFile.mkdirs();
+        }
+        // 生成base mapper文件
+        template.process(templateBaseMapper, new FileWriter(file));
+        /**** 生成base mapper java文件 end  ****/
 
     }
 
@@ -106,8 +132,7 @@ public class GenerateMain {
         String fileName = StringUtil.underlineToHump(StringUtil.toUpperCaseFirstOne(templateJava.getCommonProperty().getTableName()));
         templateJava.setFileName(fileName + "Dto");
         // 包名
-        templateJava.setPackageName(templateJava.getCommonProperty().getPackagePath() + "."
-                + templateJava.getCommonProperty().getModuleName() + ".dto" );
+        templateJava.setPackageName(assemblyPackageName(templateJava.getCommonProperty()) + ".dto" );
         // 要生成java文件所在的全相对地址
         String fileFullName = templateJava.getCommonProperty().getModulePath() + "/java/"
                 + templateJava.getPackageName().replace(".", "/") + "/" + templateJava.getFileName() + ".java";
@@ -135,8 +160,7 @@ public class GenerateMain {
         String fileName = StringUtil.underlineToHump(StringUtil.toUpperCaseFirstOne(templateBaseJava.getCommonProperty().getTableName()));
         templateBaseJava.setFileName("Base" + fileName + "Dto");
         // 包名
-        templateBaseJava.setPackageName(templateBaseJava.getCommonProperty().getPackagePath() + "."
-        + templateBaseJava.getCommonProperty().getModuleName() + ".dto.base" );
+        templateBaseJava.setPackageName(assemblyPackageName(templateBaseJava.getCommonProperty()) + ".dto.base" );
         // 要生成java文件所在的全相对地址
         String fileFullName = templateBaseJava.getCommonProperty().getModulePath() + "/java/"
                 + templateBaseJava.getPackageName().replace(".", "/") + "/" + templateBaseJava.getFileName() + ".java";
@@ -162,8 +186,10 @@ public class GenerateMain {
      * @throws Exception
      */
     public void analyzeTableColumn(TemplateBaseJava templateBaseJava ,String tableName) throws Exception{
+        /**** 此处可换成原生jdbc start ****/
         TableSchemaMapper mapper = (TableSchemaMapper) MapperUtil.getMapper(TableSchemaMapper.class);
         List<TableSchemaPo> list =  mapper.select(tableName);
+        /**** 此处可换成原生jdbc end ****/
         if (list.size() == 0){
             throw new RuntimeException(tableName + "表不存在，或" + tableName + "表字段无字段");
         }
@@ -191,6 +217,14 @@ public class GenerateMain {
         templateBaseJava.setColumnBos(columnBoList);
     }
 
+    /**
+     * 拼装前置包和模块名字
+     * @param commonPropertyBo
+     * @return
+     */
+    private String assemblyPackageName(CommonPropertyBo commonPropertyBo){
+        return commonPropertyBo.getPackagePath() + "." + commonPropertyBo.getModuleName();
+    }
 
 
 }
