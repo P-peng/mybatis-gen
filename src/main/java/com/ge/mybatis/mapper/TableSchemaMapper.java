@@ -15,5 +15,5 @@ public interface TableSchemaMapper {
      * @param tableName
      * @return
      */
-    List<TableSchemaPo> select(@Param("tableName")String tableName);
+    List<TableSchemaPo> select(@Param("tableName")String tableName, @Param("databaseName")String databaseName);
 }

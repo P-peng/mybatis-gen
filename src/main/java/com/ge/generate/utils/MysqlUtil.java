@@ -14,17 +14,20 @@ import java.util.Map;
  * @date 2019/06/28
  */
 public class MysqlUtil {
-    private static final Map<String, JavaColumn> TYPE_MAP = new HashMap<String, JavaColumn>(){{
-        put("int", new JavaColumn("Integer", Integer.class.getName()));
-        put("char", new JavaColumn("String", String.class.getName()));
-        put("varchar", new JavaColumn("String", String.class.getName()));
-        put("bit", new JavaColumn("Byte", Byte.class.getName()));
-        put("bigint", new JavaColumn("BigInteger", BigInteger.class.getName()));
-        put("float", new JavaColumn("Float", Float.class.getName()));
-        put("double",  new JavaColumn("Double", Double.class.getName()));
-        put("decimal", new JavaColumn("BigDecimal", BigDecimal.class.getName()));
-        put("datetime", new JavaColumn("Date", Date.class.getName()));
-        put("date",  new JavaColumn("Date", Date.class.getName()));
+    /**
+     *  mysql字段对应java包装类
+     */
+    private static final Map<String, JavaColumn> MYSQL_MAPPING_JAVA_MAP = new HashMap<String, JavaColumn>(){{
+        put("int", new JavaColumn("Integer", Integer.class.getName(), "INTEGER"));
+        put("char", new JavaColumn("String", String.class.getName(), "CHAR"));
+        put("varchar", new JavaColumn("String", String.class.getName(), "VARCHAR"));
+        put("bit", new JavaColumn("Byte", Byte.class.getName(), "BIT"));
+        put("bigint", new JavaColumn("BigInteger", BigInteger.class.getName(), "BIGINT"));
+        put("float", new JavaColumn("Float", Float.class.getName(), "REAL"));
+        put("double",  new JavaColumn("Double", Double.class.getName(), "DOUBLE"));
+        put("decimal", new JavaColumn("BigDecimal", BigDecimal.class.getName(), "DECIMAL"));
+        put("datetime", new JavaColumn("Date", Date.class.getName(), "TIMESTAMP"));
+        put("date",  new JavaColumn("Date", Date.class.getName(), "DATE"));
     }};
 
     /**
@@ -33,7 +36,7 @@ public class MysqlUtil {
      * @return
      */
     public static String analyzeColumnName(String sqlType){
-        return TYPE_MAP.get(sqlType).getName();
+        return MYSQL_MAPPING_JAVA_MAP.get(sqlType).getName();
     }
 
     /**
@@ -42,7 +45,16 @@ public class MysqlUtil {
      * @return
      */
     public static String analyzeColumnJavaPackage(String sqlType){
-        return TYPE_MAP.get(sqlType).getJavaPackage();
+        return MYSQL_MAPPING_JAVA_MAP.get(sqlType).getJavaPackage();
+    }
+
+    /**
+     * 传入sql字段类型，返回对应mybatis字段类型
+     * @param sqlType
+     * @return
+     */
+    public static String analyzeColumnJdbcType(String sqlType){
+        return MYSQL_MAPPING_JAVA_MAP.get(sqlType).getJdbcType();
     }
 
 }
@@ -51,12 +63,19 @@ public class MysqlUtil {
 class JavaColumn{
     private String name;
     private String javaPackage;
+    private String jdbcType;
 
     public JavaColumn(){}
 
     public JavaColumn(String name, String javaPackage) {
         this.name = name;
         this.javaPackage = javaPackage;
+    }
+
+    public JavaColumn(String name, String javaPackage, String jdbcType) {
+        this.name = name;
+        this.javaPackage = javaPackage;
+        this.jdbcType = jdbcType;
     }
 
     public String getName() {
@@ -73,5 +92,13 @@ class JavaColumn{
 
     public void setJavaPackage(String javaPackage) {
         this.javaPackage = javaPackage;
+    }
+
+    public String getJdbcType() {
+        return jdbcType;
+    }
+
+    public void setJdbcType(String jdbcType) {
+        this.jdbcType = jdbcType;
     }
 }

@@ -1,22 +1,108 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="${basePackage}.mapper.${bigClassName}Mapper">
-    <resultMap id="BaseResultMap" type="${basePackage}.domain.${bigClassName}">
+<mapper namespace="${namespace}">
+    <resultMap id="BaseResultMap" type="${type}">
+        <#list columnBos as columnBo>
+        <#if (columnBo.jdbcName == 'id')>
+        <id column="a_${columnBo.jdbcName}" jdbcType="${columnBo.jdbcType}" property="${columnBo.javaName}" />
+        </#if>
+        <#if (columnBo.jdbcName != 'id')>
+        <result column="a_${columnBo.jdbcName}" jdbcType="${columnBo.jdbcType}" property="${columnBo.javaName}" />
+        </#if>
+        </#list>
     </resultMap>
 
-    <sql id="Base_Column_List" >
-      ${sqlColumn}
+    <sql id="Base_Column_List">
+        ${sqlColumn}
     </sql>
 
-    <sql id="Condition" >
+    <sql id="Condition">
+        <if test="params != null">
+            <#list columnBos as columnBo>
+            <#if (columnBo.jdbcType == 'VARCHAR') || (columnBo.jdbcType == 'CHAR')>
+            <if test="params.${columnBo.javaName} != null AND params.${columnBo.javaName} != ''">
+                AND a.${columnBo.jdbcName} = <#noparse>#</#noparse>{params.${columnBo.javaName},jdbcType=${columnBo.jdbcType}}
+            </if>
+            </#if>
+            <#if (columnBo.jdbcType != 'VARCHAR') && (columnBo.jdbcType != 'CHAR')>
+            <if test="params.${columnBo.javaName} != null">
+                AND a.${columnBo.jdbcName} = <#noparse>#</#noparse>{params.${columnBo.javaName},jdbcType=${columnBo.jdbcType}}
+            </if>
+            </#if>
+            </#list>
+        </if>
     </sql>
 
     <sql id="Base_Insert">
+        insert into ${commonPropertyBo.tableName} (
+        <#list columnBos as columnBo>
+            ${columnBo.jdbcName} <#if columnBo_has_next>,</#if>
+        </#list>
+        )
+        values (
+        <#list columnBos as columnBo>
+            <#noparse>#</#noparse>{${columnBo.jdbcName},jdbcType=${columnBo.jdbcType}}
+        </#list>
+        )
     </sql>
 
-    <sql id="Base_InsertSelective"></sql>
+    <sql id="Base_InsertSelective">
+        insert into ${commonPropertyBo.tableName}
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <#list columnBos as columnBo>
+            <#if (columnBo.jdbcType == 'VARCHAR') || (columnBo.jdbcType == 'CHAR')>
+            <if test="params.${columnBo.javaName} != null AND params.${columnBo.javaName} != ''">
+                ${columnBo.jdbcName}
+            </if>
+            </#if>
+            <#if (columnBo.jdbcType != 'VARCHAR') && (columnBo.jdbcType != 'CHAR')>
+            <if test="params.${columnBo.javaName} != null">
+                ${columnBo.jdbcName}
+            </if>
+            </#if>
+            </#list>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <#list columnBos as columnBo>
+            <#if (columnBo.jdbcType == 'VARCHAR') || (columnBo.jdbcType == 'CHAR')>
+            <if test="params.${columnBo.javaName} != null AND params.${columnBo.javaName} != ''">
+                ${columnBo.jdbcName} = <#noparse>#</#noparse>{params.${columnBo.javaName},jdbcType=${columnBo.jdbcType}}
+            </if>
+            </#if>
+            <#if (columnBo.jdbcType != 'VARCHAR') && (columnBo.jdbcType != 'CHAR')>
+            <if test="params.${columnBo.javaName} != null">
+                ${columnBo.jdbcName} = <#noparse>#</#noparse>{params.${columnBo.javaName},jdbcType=${columnBo.jdbcType}}
+            </if>
+            </#if>
+            </#list>
+        </trim>
+    </sql>
 
-    <sql id="Base_UpdateByPrimaryKeySelective"></sql>
+    <sql id="Base_UpdateByPrimaryKeySelective">
+        update ${commonPropertyBo.tableName}
+        <set>
+            <#list columnBos as columnBo>
+            <#if (columnBo.jdbcType == 'VARCHAR') || (columnBo.jdbcType == 'CHAR')>
+            <if test="params.${columnBo.javaName} != null AND params.${columnBo.javaName} != ''">
+                ${columnBo.jdbcName} = <#noparse>#</#noparse>{params.${columnBo.javaName},jdbcType=${columnBo.jdbcType}}
+            </if>
+            </#if>
+            <#if (columnBo.jdbcType != 'VARCHAR') && (columnBo.jdbcType != 'CHAR')>
+            <if test="params.${columnBo.javaName} != null">
+                ${columnBo.jdbcName} = <#noparse>#</#noparse>{params.${columnBo.javaName},jdbcType=${columnBo.jdbcType}}
+            </if>
+            </#if>
+            </#list>
+        </set>
+        where id = <#noparse>#</#noparse>{id,jdbcType=INTEGER}
+    </sql>
 
-    <sql id="Base_UpdateByPrimaryKey" ></sql>
+    <sql id="Base_UpdateByPrimaryKey">
+        update ${commonPropertyBo.tableName}
+        set
+        <#list columnBos as columnBo>
+        ${columnBo.jdbcName} = <#noparse>#</#noparse>{${columnBo.javaName},jdbcType=${columnBo.jdbcType}}<#if columnBo_has_next>,</#if>
+        </#list>
+        where id = <#noparse>#</#noparse>{id,jdbcType=INTEGER}
+    </sql>
 </mapper>

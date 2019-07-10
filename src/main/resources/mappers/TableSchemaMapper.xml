@@ -7,6 +7,7 @@
         <result column="column_comment" javaType="STRING" property="columnComment"/>
     </resultMap>
     <select id="select" resultMap="BaseResultMap">
-        select `data_type`, `column_name`, `column_comment` FROM information_schema.columns where table_name = #{tableName}
+        select `data_type`, `column_name`, `column_comment` FROM information_schema.columns
+        where table_name = #{tableName} AND table_schema = #{databaseName};
     </select>
 </mapper>

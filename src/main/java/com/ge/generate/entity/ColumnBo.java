@@ -31,5 +31,12 @@ public class ColumnBo {
      * jdbc字段名
      */
     private String jdbcName;
+    /**
+     * 加前缀
+     */
+    /**
+     * mybaits字段类型
+     */
+    private String jdbcType;
 
 }

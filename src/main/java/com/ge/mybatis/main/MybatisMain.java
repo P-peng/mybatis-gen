@@ -20,7 +20,7 @@ public class MybatisMain {
         //true 不开启事务，自动提交
         SqlSession sqlSession = factory.openSession(true);
         TableSchemaMapper mapper = sqlSession.getMapper(TableSchemaMapper.class);
-        List<TableSchemaPo> list = mapper.select("ge");
+        List<TableSchemaPo> list = mapper.select("ge", "ge");
         Iterator i = list.iterator();
         while (i.hasNext()){
             System.out.println(i.next());

@@ -41,4 +41,13 @@ public class StringUtil {
             return (new StringBuilder()).append(Character.toUpperCase(s.charAt(0))).append(s.substring(1)).toString();
         }
     }
+
+    /**
+     * 先驼峰，在首字母大写
+     * @param args
+     * @return
+     */
+    public static String underlineToHumpAndFirstToUpper(String args){
+        return toUpperCaseFirstOne(underlineToHump(args));
+    }
 }
