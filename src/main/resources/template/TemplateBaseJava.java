@@ -17,9 +17,8 @@ import ${javapackage};
 public class ${fileName} implements Serializable {
     private static final long serialVersionUID = 19970718L;
     <#list columnBos as columnBo>
-    /**
-     * ${columnBo.comment}
-     */
+
+    /** ${columnBo.comment} */
     private ${columnBo.javaType} ${columnBo.javaName};
     </#list>
 }

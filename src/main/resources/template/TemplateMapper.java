@@ -1,8 +1,10 @@
-package template;
+package ${packageName};
 
+import ${fatherPackage};
 /**
- * @author dengzhipeng
- * @date 2019/07/05
+ * @author ${commonProperty.author}
+ * @date ${commonProperty.date}
+ * @version ${commonProperty.version}
  */
-public interface TemplateMapper {
+public interface ${fileName} extends ${fatherName}{
 }
