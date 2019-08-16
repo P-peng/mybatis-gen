@@ -99,6 +99,8 @@ public class GenerateMain {
 
         TemplateMapperXml templateMapperXml = new TemplateMapperXml();
         templateMapperXml.setType(templateJava.getPackageName() + "." + templateJava.getFileName());
+        templateMapperXml.setResultMapExtend(templateBaseMapper.getPackageName() + "." + templateBaseMapper.getFileName());
+        templateMapperXml.setCommonPropertyBo(commonProperty);
         generateMapper(templateMapper, templateMapperXml);
 
     }
@@ -135,20 +137,20 @@ public class GenerateMain {
         templateMapperXml.setNamespace(templateMapper.getPackageName() + "." + templateMapper.getFileName());
 
         // 要生成xml文件所在的全相对地址
-//        String xmlFileFullName = templateBaseMapper.getCommonProperty().getModulePath() + "/resources/mappers/"
-//                + templateBaseMapperXml.getCommonPropertyBo().getModuleName()+ "/" + templateBaseMapperXml.getFileName()
-//                + ".xml";
-//
-//        Template xmlTemplate = config.getTemplate(templateBaseMapperXmlPath);
-//        String xmlTargetFile = MessageFormat.format(xmlFileFullName, xmlFileFullName);
-//        File xmlFile = new File(xmlTargetFile);
-//        File xmlParentFile = xmlFile.getParentFile();
-//        // 创建文件目录
-//        if (!xmlParentFile.exists()) {
-//            xmlParentFile.mkdirs();
-//        }
-//        // 生成base mapper xml文件
-//        xmlTemplate.process(templateBaseMapperXml, new FileWriter(xmlFile));
+        String xmlFileFullName = templateMapperXml.getCommonPropertyBo().getModulePath() + "/resources/mappers/"
+                + templateMapperXml.getCommonPropertyBo().getModuleName()+ "/" + templateMapperXml.getFileName()
+                + ".xml";
+
+        Template xmlTemplate = config.getTemplate(templateMapperXmlPath);
+        String xmlTargetFile = MessageFormat.format(xmlFileFullName, xmlFileFullName);
+        File xmlFile = new File(xmlTargetFile);
+        File xmlParentFile = xmlFile.getParentFile();
+        // 创建文件目录
+        if (!xmlParentFile.exists()) {
+            xmlParentFile.mkdirs();
+        }
+        // 生成 mapper xml文件
+        xmlTemplate.process(templateMapperXml, new FileWriter(xmlFile));
 
     }
 

@@ -20,13 +20,13 @@
         <if test="params != null">
             <#list columnBos as columnBo>
             <#if (columnBo.jdbcType == 'VARCHAR') || (columnBo.jdbcType == 'CHAR')>
-            <if test="params.${columnBo.javaName} != null AND params.${columnBo.javaName} != ''">
-                AND a.${columnBo.jdbcName} = <#noparse>#</#noparse>{params.${columnBo.javaName},jdbcType=${columnBo.jdbcType}}
+            <if test="params.${columnBo.javaName} != null and params.${columnBo.javaName} != ''">
+                and a.${columnBo.jdbcName} = <#noparse>#</#noparse>{params.${columnBo.javaName},jdbcType=${columnBo.jdbcType}}
             </if>
             </#if>
             <#if (columnBo.jdbcType != 'VARCHAR') && (columnBo.jdbcType != 'CHAR')>
             <if test="params.${columnBo.javaName} != null">
-                AND a.${columnBo.jdbcName} = <#noparse>#</#noparse>{params.${columnBo.javaName},jdbcType=${columnBo.jdbcType}}
+                and a.${columnBo.jdbcName} = <#noparse>#</#noparse>{params.${columnBo.javaName},jdbcType=${columnBo.jdbcType}}
             </if>
             </#if>
             </#list>
@@ -51,13 +51,13 @@
         <trim prefix="(" suffix=")" suffixOverrides="," >
             <#list columnBos as columnBo>
             <#if (columnBo.jdbcType == 'VARCHAR') || (columnBo.jdbcType == 'CHAR')>
-            <if test="params.${columnBo.javaName} != null AND params.${columnBo.javaName} != ''">
-                ${columnBo.jdbcName}
+            <if test="${columnBo.javaName} != null and ${columnBo.javaName} != ''">
+                ${columnBo.jdbcName},
             </if>
             </#if>
             <#if (columnBo.jdbcType != 'VARCHAR') && (columnBo.jdbcType != 'CHAR')>
-            <if test="params.${columnBo.javaName} != null">
-                ${columnBo.jdbcName}
+            <if test="${columnBo.javaName} != null">
+                ${columnBo.jdbcName},
             </if>
             </#if>
             </#list>
@@ -65,13 +65,13 @@
         <trim prefix="values (" suffix=")" suffixOverrides="," >
             <#list columnBos as columnBo>
             <#if (columnBo.jdbcType == 'VARCHAR') || (columnBo.jdbcType == 'CHAR')>
-            <if test="params.${columnBo.javaName} != null AND params.${columnBo.javaName} != ''">
-                ${columnBo.jdbcName} = <#noparse>#</#noparse>{params.${columnBo.javaName},jdbcType=${columnBo.jdbcType}}
+            <if test="${columnBo.javaName} != null and ${columnBo.javaName} != ''">
+                <#noparse>#</#noparse>{${columnBo.javaName},jdbcType=${columnBo.jdbcType}},
             </if>
             </#if>
             <#if (columnBo.jdbcType != 'VARCHAR') && (columnBo.jdbcType != 'CHAR')>
-            <if test="params.${columnBo.javaName} != null">
-                ${columnBo.jdbcName} = <#noparse>#</#noparse>{params.${columnBo.javaName},jdbcType=${columnBo.jdbcType}}
+            <if test="${columnBo.javaName} != null">
+                <#noparse>#</#noparse>{${columnBo.javaName},jdbcType=${columnBo.jdbcType}},
             </if>
             </#if>
             </#list>
@@ -83,13 +83,13 @@
         <set>
             <#list columnBos as columnBo>
             <#if (columnBo.jdbcType == 'VARCHAR') || (columnBo.jdbcType == 'CHAR')>
-            <if test="params.${columnBo.javaName} != null AND params.${columnBo.javaName} != ''">
-                ${columnBo.jdbcName} = <#noparse>#</#noparse>{params.${columnBo.javaName},jdbcType=${columnBo.jdbcType}}
+            <if test="${columnBo.javaName} != null and ${columnBo.javaName} != ''">
+                ${columnBo.jdbcName} = <#noparse>#</#noparse>{${columnBo.javaName},jdbcType=${columnBo.jdbcType}},
             </if>
             </#if>
             <#if (columnBo.jdbcType != 'VARCHAR') && (columnBo.jdbcType != 'CHAR')>
-            <if test="params.${columnBo.javaName} != null">
-                ${columnBo.jdbcName} = <#noparse>#</#noparse>{params.${columnBo.javaName},jdbcType=${columnBo.jdbcType}}
+            <if test="${columnBo.javaName} != null">
+                ${columnBo.jdbcName} = <#noparse>#</#noparse>{${columnBo.javaName},jdbcType=${columnBo.jdbcType}},
             </if>
             </#if>
             </#list>

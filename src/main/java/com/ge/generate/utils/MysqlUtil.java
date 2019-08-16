@@ -57,6 +57,10 @@ public class MysqlUtil {
         return MYSQL_MAPPING_JAVA_MAP.get(sqlType).getJdbcType();
     }
 
+    /**
+     * Mysql关键字转换
+     */
+
 }
 
 
