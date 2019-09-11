@@ -41,12 +41,12 @@ public class GenerateMain {
             System.out.println("生成java文件失败");
             e.printStackTrace();
         }
-        System.out.println("is ok");
+        System.out.println("ok");
     }
 
 
     public void go() throws Exception {
-        // 读取配置文件信息
+        /**  读取配置文件信息 */
         String genPath = "./src/main/resources/gen.properties";
         ReadPropertiesUtil.intiReadProperties(genPath);
         CommonPropertyBo commonProperty = new CommonPropertyBo();
@@ -61,25 +61,26 @@ public class GenerateMain {
         commonProperty.setDatabaseName(ReadPropertiesUtil.readByName("databaseName"));
         commonProperty.setDate(new SimpleDateFormat("yyyy/MM/dd").format(new Date()));
 
-        /** 解析mysql表字段，生成 base java实体文件 start */
+        /** 解析mysql表字段，生成 BaseDto.java实体文件 start */
         TemplateBaseJava templateBaseJava = new TemplateBaseJava();
         templateBaseJava.setCommonProperty(commonProperty);
         // 此处可不使用mybatis框架，换成原生jdbc
         analyzeTableColumn(templateBaseJava, commonProperty.getTableName(), commonProperty.getDatabaseName());
         generateBaseJava(templateBaseJava);
-        /** 解析mysql表字段，生成 base java实体文件 end   */
+        /** 解析mysql表字段，生成 BaseDto.java实体文件 end   */
 
 
-        /** 生成扩展 java文件 start */
+        /** 生成 扩展 Dto.java 文件 start */
         TemplateJava templateJava = new TemplateJava();
         // 父类包名和名字
         templateJava.setFatherName(templateBaseJava.getFileName());
         templateJava.setFatherPackage(templateBaseJava.getPackageName() + "." + templateBaseJava.getFileName());
         templateJava.setCommonProperty(commonProperty);
         generateJava(templateJava);
-        /** 生成扩展 java文件 end */
+        /** 生成 扩展 Dto.java 文件 end */
 
-        /** 生成基础 base mapper.java 和 base mapper.xml文件 start */
+
+        /** 生成基础 BaseMapper.java 接口 和 BaseMapper.xml 接口映射 文件 start */
         TemplateBaseMapper templateBaseMapper = new TemplateBaseMapper();
         // 读取BaseCrudMapper接口所在的包地址
         templateBaseMapper.setFatherPackage(ReadPropertiesUtil.readByName("baseCrudMapperPath"));
@@ -89,9 +90,10 @@ public class GenerateMain {
         templateBaseMapperXml.setCommonPropertyBo(commonProperty);
         templateBaseMapperXml.setColumnBos(templateBaseJava.getColumnBos());
         generateBaseMapperAndBaseMapperXml(templateBaseMapper, templateBaseMapperXml);
-        /** 生成基础 base mapper.java 和 base mapper.xml文件 end   */
+        /** 生成基础 BaseMapper.java 接口 和 BaseMapper.xml 接口映射 文件 end */
 
-        /** 生成扩展 mapper.java 和 mapper.xml文件 */
+
+        /** 生成 扩展 Mapper.java 和 Mapper.xml文件 start */
         TemplateMapper templateMapper = new TemplateMapper();
         templateMapper.setCommonProperty(commonProperty);
         templateMapper.setFatherName(templateBaseMapper.getFileName());
@@ -102,6 +104,7 @@ public class GenerateMain {
         templateMapperXml.setResultMapExtend(templateBaseMapper.getPackageName() + "." + templateBaseMapper.getFileName());
         templateMapperXml.setCommonPropertyBo(commonProperty);
         generateMapper(templateMapper, templateMapperXml);
+        /** 生成 扩展 Mapper.java 和 Mapper.xml文件 end */
 
     }
 
@@ -111,7 +114,7 @@ public class GenerateMain {
     public void generateMapper(TemplateMapper templateMapper, TemplateMapperXml templateMapperXml) throws Exception {
         /** 生成 mapper interface java文件 start */
         // java文件名
-        String fileName = StringUtil.underlineToHump(StringUtil.toUpperCaseFirstOne(templateMapper.getCommonProperty().getTableName()));
+        String fileName = StringUtil.underlineToHumpAndFirstToUpper(templateMapper.getCommonProperty().getTableName());
         templateMapper.setFileName(fileName + "Mapper");
         templateMapper.setPackageName(assemblyPackageName(templateMapper.getCommonProperty()) + ".mapper");
         // 要生成java文件所在的全相对地址
@@ -132,7 +135,7 @@ public class GenerateMain {
         /** 生成 mapper interface java文件 end */
 
         /** 生成 mapper xml文件 */
-        String xmlFileName = StringUtil.underlineToHump(StringUtil.toUpperCaseFirstOne(templateMapper.getCommonProperty().getTableName()));
+        String xmlFileName = StringUtil.underlineToHumpAndFirstToUpper(templateMapper.getCommonProperty().getTableName());
         templateMapperXml.setFileName(xmlFileName + "Mapper");
         templateMapperXml.setNamespace(templateMapper.getPackageName() + "." + templateMapper.getFileName());
 
@@ -163,7 +166,7 @@ public class GenerateMain {
      */
     public void generateJava(TemplateJava templateJava) throws IOException, TemplateException {
         // java文件名
-        String fileName = StringUtil.underlineToHump(StringUtil.toUpperCaseFirstOne(templateJava.getCommonProperty().getTableName()));
+        String fileName = StringUtil.underlineToHumpAndFirstToUpper(templateJava.getCommonProperty().getTableName());
         templateJava.setFileName(fileName + "Dto");
         // 包名
         templateJava.setPackageName(assemblyDtoPackageName(templateJava.getCommonProperty()) + ".dto" );
@@ -191,7 +194,7 @@ public class GenerateMain {
      */
     public void generateBaseJava(TemplateBaseJava templateBaseJava) throws Exception {
         // java文件名
-        String fileName = StringUtil.underlineToHump(StringUtil.toUpperCaseFirstOne(templateBaseJava.getCommonProperty().getTableName()));
+        String fileName = StringUtil.underlineToHumpAndFirstToUpper(templateBaseJava.getCommonProperty().getTableName());
         templateBaseJava.setFileName("Base" + fileName + "Dto");
         // 包名
         templateBaseJava.setPackageName(assemblyDtoPackageName(templateBaseJava.getCommonProperty()) + ".dto.base" );
@@ -242,7 +245,7 @@ public class GenerateMain {
             bo.setJdbcName(po.getColumnName());
             // 注释
             bo.setComment(po.getColumnComment());
-            // 分析是否属于费java.lang的包
+            // 分析是否属于java.lang的包
             if (bo.getJavaPackage().indexOf("java.lang") < 0){
                 importJavapackage.add(bo.getJavaPackage());
             }
@@ -277,7 +280,7 @@ public class GenerateMain {
      */
     public void generateBaseMapperAndBaseMapperXml(TemplateBaseMapper templateBaseMapper, TemplateBaseMapperXml templateBaseMapperXml) throws IOException, TemplateException {
         /**** 生成base mapper java文件 start ****/
-        String fileName = StringUtil.underlineToHump(StringUtil.toUpperCaseFirstOne(templateBaseMapper.getCommonProperty().getTableName()));
+        String fileName = StringUtil.underlineToHumpAndFirstToUpper(templateBaseMapper.getCommonProperty().getTableName());
         templateBaseMapper.setFileName("Base" + fileName + "Mapper");
         templateBaseMapper.setPackageName(assemblyPackageName(templateBaseMapper.getCommonProperty()) + ".mapper.base");
         // 要生成java文件所在的全相对地址

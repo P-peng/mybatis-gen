@@ -2,9 +2,7 @@ package com.ge.generate.utils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 用于mysql的字段类型向java对应转换工具类。
@@ -17,18 +15,30 @@ public class MysqlUtil {
     /**
      *  mysql字段对应java包装类
      */
-    private static final Map<String, JavaColumn> MYSQL_MAPPING_JAVA_MAP = new HashMap<String, JavaColumn>(){{
+    private static final Map<String, JavaColumn> MYSQL_MAPPING_JAVA_MAP = new HashMap<String, JavaColumn>(32){{
         put("int", new JavaColumn("Integer", Integer.class.getName(), "INTEGER"));
+        put("tinyint", new JavaColumn("Integer", Integer.class.getName(), "INTEGER"));
         put("char", new JavaColumn("String", String.class.getName(), "CHAR"));
         put("varchar", new JavaColumn("String", String.class.getName(), "VARCHAR"));
+        put("longtext",  new JavaColumn("String", String.class.getName(), "LONGVARCHAR"));
         put("bit", new JavaColumn("Byte", Byte.class.getName(), "BIT"));
         put("bigint", new JavaColumn("BigInteger", BigInteger.class.getName(), "BIGINT"));
         put("float", new JavaColumn("Float", Float.class.getName(), "REAL"));
         put("double",  new JavaColumn("Double", Double.class.getName(), "DOUBLE"));
         put("decimal", new JavaColumn("BigDecimal", BigDecimal.class.getName(), "DECIMAL"));
         put("datetime", new JavaColumn("Date", Date.class.getName(), "TIMESTAMP"));
-        put("date",  new JavaColumn("Date", Date.class.getName(), "DATE"));
+        put("date",  new JavaColumn("Date", Date.class.getName(), "TIMESTAMP"));
+        put("timestamp",  new JavaColumn("Date", Date.class.getName(), "TIMESTAMP"));
     }};
+
+    private static final Set<String> MYSQL_KEY = new HashSet<String>(16){
+        {
+            add("to");
+            add("from");
+            add("value");
+            add("timestamp");
+        }
+    };
 
     /**
      * 传入sql字段类型，返回java字段名字
