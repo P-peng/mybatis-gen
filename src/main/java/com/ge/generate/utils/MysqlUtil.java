@@ -31,6 +31,9 @@ public class MysqlUtil {
         put("timestamp",  new JavaColumn("Date", Date.class.getName(), "TIMESTAMP"));
     }};
 
+    /**
+     * Mysql关键字
+     */
     private static final Set<String> MYSQL_KEY = new HashSet<String>(16){
         {
             add("to");

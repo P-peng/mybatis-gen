@@ -7,8 +7,5 @@ import org.junit.Test;
  */
 public class GenerateJavaTest {
 
-    @Test
-    public void t(){
-        GenerateMain main = new GenerateMain();
-    }
+
 }
