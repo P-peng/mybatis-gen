@@ -7,31 +7,33 @@ import com.ge.generate.utils.StringUtil;
 import com.ge.mybatis.entity.TableSchemaPo;
 import com.ge.mybatis.mapper.TableSchemaMapper;
 import com.ge.mybatis.utils.MapperUtil;
+import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.Version;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * @author dengzhipeng
  * @date 2019/06/21
  */
 public class GenerateMain {
-    private static String templateBaseJavaPath = "./src/main/resources/template/TemplateBaseJava.java";
-    private static String templateJavaPath = "./src/main/resources/template/TemplateJava.java";
-    private static String templateBaseMapperPath = "./src/main/resources/template/TemplateBaseMapper.java";
-    private static String templateBaseMapperXmlPath = "./src/main/resources/template/TemplateBaseMapperXml.xml";
-    private static String templateMapperPath = "./src/main/resources/template/TemplateMapper.java";
-    private static String templateMapperXmlPath = "./src/main/resources/template/TemplateMapperXml.xml";
+    private static String templateBaseJavaPath = "TemplateBaseJava.java";
+    private static String templateJavaPath = "TemplateJava.java";
+    private static String templateBaseMapperPath = "TemplateBaseMapper.java";
+    private static String templateBaseMapperXmlPath = "TemplateBaseMapperXml.xml";
+    private static String templateMapperPath = "TemplateMapper.java";
+    private static String templateMapperXmlPath = "TemplateMapperXml.xml";
+
+    private static Properties pro;
 
     public static void main(String[] args){
         GenerateMain main = new GenerateMain();
@@ -44,21 +46,38 @@ public class GenerateMain {
         System.out.println("ok");
     }
 
+    private void intiReadProperties(String path) throws IOException {
+        pro = new Properties();
+
+        InputStream in = this.getClass().getClassLoader().getResourceAsStream(path);
+
+//        FileInputStream in = new FileInputStream(path);
+        pro.load(in);
+        in.close();
+    }
+
+    public String readByName(String name) throws IOException {
+        if (pro == null){
+            new Exception("为加载位置文件");
+        }
+        return pro.getProperty(name);
+    }
 
     public void go() throws Exception {
         /**  读取配置文件信息 */
-        String genPath = "./src/main/resources/gen.properties";
-        ReadPropertiesUtil.intiReadProperties(genPath);
+        String genPath = "gen.properties";
+//        ReadPropertiesUtil.intiReadProperties(genPath);
+        intiReadProperties(genPath);
         CommonPropertyBo commonProperty = new CommonPropertyBo();
-        commonProperty.setAuthor(ReadPropertiesUtil.readByName("author"));
-        commonProperty.setVersion(ReadPropertiesUtil.readByName("version"));
-        commonProperty.setModulePath(ReadPropertiesUtil.readByName("modulePath"));
-        commonProperty.setPackagePath(ReadPropertiesUtil.readByName("packagePath"));
-        commonProperty.setDtoModulePath(ReadPropertiesUtil.readByName("dtoModulePath"));
-        commonProperty.setDtoPackagePath(ReadPropertiesUtil.readByName("dtoPackagePath"));
-        commonProperty.setTableName(ReadPropertiesUtil.readByName("tableName"));
-        commonProperty.setModuleName(ReadPropertiesUtil.readByName("moduleName"));
-        commonProperty.setDatabaseName(ReadPropertiesUtil.readByName("databaseName"));
+        commonProperty.setAuthor(readByName("author"));
+        commonProperty.setVersion(readByName("version"));
+        commonProperty.setModulePath(readByName("modulePath"));
+        commonProperty.setPackagePath(readByName("packagePath"));
+        commonProperty.setDtoModulePath(readByName("dtoModulePath"));
+        commonProperty.setDtoPackagePath(readByName("dtoPackagePath"));
+        commonProperty.setTableName(readByName("tableName"));
+        commonProperty.setModuleName(readByName("moduleName"));
+        commonProperty.setDatabaseName(readByName("databaseName"));
         commonProperty.setDate(new SimpleDateFormat("yyyy/MM/dd").format(new Date()));
 
         /** 解析mysql表字段，生成 BaseDto.java实体文件 start */
@@ -83,7 +102,7 @@ public class GenerateMain {
         /** 生成基础 BaseMapper.java 接口 和 BaseMapper.xml 接口映射 文件 start */
         TemplateBaseMapper templateBaseMapper = new TemplateBaseMapper();
         // 读取BaseCrudMapper接口所在的包地址
-        templateBaseMapper.setFatherPackage(ReadPropertiesUtil.readByName("baseCrudMapperPath"));
+        templateBaseMapper.setFatherPackage(readByName("baseCrudMapperPath"));
         templateBaseMapper.setCommonProperty(commonProperty);
 
         TemplateBaseMapperXml templateBaseMapperXml = new TemplateBaseMapperXml();
@@ -122,6 +141,9 @@ public class GenerateMain {
                 + templateMapper.getPackageName().replace(".", "/") + "/" + templateMapper.getFileName() + ".java";
         Version version = new Version("2.3.0");
         Configuration config = new Configuration(version);
+
+        config.setTemplateLoader(new ClassTemplateLoader(this.getClass(), "/template/"));
+
         Template template = config.getTemplate(templateMapperPath);
         String targetFile = MessageFormat.format(fileFullName, fileFullName);
         File file = new File(targetFile);
@@ -175,6 +197,9 @@ public class GenerateMain {
                 + templateJava.getPackageName().replace(".", "/") + "/" + templateJava.getFileName() + ".java";
         Version version = new Version("2.3.0");
         Configuration config = new Configuration(version);
+
+        config.setTemplateLoader(new ClassTemplateLoader(this.getClass(), "/template/"));
+
         Template template = config.getTemplate(templateJavaPath);
         String targetFile = MessageFormat.format(fileFullName, fileFullName);
         File file = new File(targetFile);
@@ -204,6 +229,9 @@ public class GenerateMain {
 
         Version version = new Version("2.3.0");
         Configuration config = new Configuration(version);
+
+        config.setTemplateLoader(new ClassTemplateLoader(this.getClass(), "/template/"));
+
         Template template = config.getTemplate(templateBaseJavaPath);
         String targetFile = MessageFormat.format(fileFullName, fileFullName);
         File file = new File(targetFile);
@@ -288,6 +316,9 @@ public class GenerateMain {
                 + templateBaseMapper.getPackageName().replace(".", "/") + "/" + templateBaseMapper.getFileName() + ".java";
         Version version = new Version("2.3.0");
         Configuration config = new Configuration(version);
+
+        config.setTemplateLoader(new ClassTemplateLoader(this.getClass(), "/template/"));
+
         Template template = config.getTemplate(templateBaseMapperPath);
         String targetFile = MessageFormat.format(fileFullName, fileFullName);
         File file = new File(targetFile);
