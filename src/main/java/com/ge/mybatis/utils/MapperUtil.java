@@ -10,6 +10,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
  */
 public class MapperUtil {
     public static Object getMapper(Class cla){
+        SqlSessionFactoryUtil.init();
         SqlSessionFactory factory = SqlSessionFactoryUtil.sqlSessionFactory;
         //true 不开启事务，自动提交
         SqlSession sqlSession = factory.openSession(true);

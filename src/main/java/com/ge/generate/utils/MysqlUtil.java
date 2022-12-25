@@ -29,6 +29,7 @@ public class MysqlUtil {
         put("datetime", new JavaColumn("Date", Date.class.getName(), "TIMESTAMP"));
         put("date",  new JavaColumn("Date", Date.class.getName(), "TIMESTAMP"));
         put("timestamp",  new JavaColumn("Date", Date.class.getName(), "TIMESTAMP"));
+        put("json", new JavaColumn("String", String.class.getName(), "json"));
     }};
 
     /**

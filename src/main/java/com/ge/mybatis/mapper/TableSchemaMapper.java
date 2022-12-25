@@ -1,6 +1,6 @@
 package com.ge.mybatis.mapper;
 
-import com.ge.mybatis.entity.TableSchemaPo;
+import com.ge.generate.entity.TableSchemaPo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

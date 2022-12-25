@@ -1,25 +1,26 @@
-package com.ge.generate.mian;
+package com.ge.generate.main;
 
+import com.ge.generate.db.DBUtil;
 import com.ge.generate.entity.*;
 import com.ge.generate.utils.MysqlUtil;
-import com.ge.generate.utils.ReadPropertiesUtil;
 import com.ge.generate.utils.StringUtil;
-import com.ge.mybatis.entity.TableSchemaPo;
-import com.ge.mybatis.mapper.TableSchemaMapper;
-import com.ge.mybatis.utils.MapperUtil;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.Version;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * @author dengzhipeng
@@ -33,12 +34,50 @@ public class GenerateMain {
     private static String templateMapperPath = "TemplateMapper.java";
     private static String templateMapperXmlPath = "TemplateMapperXml.xml";
 
-    private static Properties pro;
+    // 公共配置
+    private static CommonPropertyBo commonProperty;
 
     public static void main(String[] args){
+        // 单表
+        var tableName = "ge";
+
+        // 数据库信息
+        var drive = "com.mysql.jdbc.Driver";
+        var url = "jdbc:mysql://120.55.162.42:3306/ge?useSSL=false";
+        var user = "root";
+        var password = "Lv123456+";
+
+        // 公共配置
+        var author = "dengzhipeng";
+        var version = "1.0";
+
+        // java实体 mapper xml
+        var modulePath = "src/main";
+        var packagePath = "com.ge";
+
+        // dto对象生成路径 和 报名
+        var dtoModulePath = "src/main";
+        var dtoPackagePath = "com.ge";
+        var moduleName = "ge";
+        var baseCrudMapper = "com.ge.generate.base.BaseCrudMapper";
+
+        // 其他配置
+
+        commonProperty = new CommonPropertyBo();
+        commonProperty.setTableName(tableName);
+        commonProperty.setAuthor(author);
+        commonProperty.setVersion(version);
+        commonProperty.setModulePath(modulePath);
+        commonProperty.setPackagePath(packagePath);
+        commonProperty.setDtoModulePath(dtoModulePath);
+        commonProperty.setDtoPackagePath(dtoPackagePath);
+        commonProperty.setModuleName(moduleName);
+        commonProperty.setDate(new SimpleDateFormat("yyyy/MM/dd").format(new Date()));
+        commonProperty.setBaseCrudMapper(baseCrudMapper);
+
         GenerateMain main = new GenerateMain();
         try {
-            main.go();
+            main.go(drive, url, user, password, tableName);
         } catch (Exception e) {
             System.out.println("生成java文件失败");
             e.printStackTrace();
@@ -46,45 +85,16 @@ public class GenerateMain {
         System.out.println("ok");
     }
 
-    private void intiReadProperties(String path) throws IOException {
-        pro = new Properties();
 
-        InputStream in = this.getClass().getClassLoader().getResourceAsStream(path);
 
-//        FileInputStream in = new FileInputStream(path);
-        pro.load(in);
-        in.close();
-    }
-
-    public String readByName(String name) throws IOException {
-        if (pro == null){
-            new Exception("为加载位置文件");
-        }
-        return pro.getProperty(name);
-    }
-
-    public void go() throws Exception {
+    public void go(String drive, String url, String user, String password, String tableName) throws Exception {
         /**  读取配置文件信息 */
-        String genPath = "gen.properties";
-//        ReadPropertiesUtil.intiReadProperties(genPath);
-        intiReadProperties(genPath);
-        CommonPropertyBo commonProperty = new CommonPropertyBo();
-        commonProperty.setAuthor(readByName("author"));
-        commonProperty.setVersion(readByName("version"));
-        commonProperty.setModulePath(readByName("modulePath"));
-        commonProperty.setPackagePath(readByName("packagePath"));
-        commonProperty.setDtoModulePath(readByName("dtoModulePath"));
-        commonProperty.setDtoPackagePath(readByName("dtoPackagePath"));
-        commonProperty.setTableName(readByName("tableName"));
-        commonProperty.setModuleName(readByName("moduleName"));
-        commonProperty.setDatabaseName(readByName("databaseName"));
-        commonProperty.setDate(new SimpleDateFormat("yyyy/MM/dd").format(new Date()));
 
         /** 解析mysql表字段，生成 BaseDto.java实体文件 start */
         TemplateBaseJava templateBaseJava = new TemplateBaseJava();
         templateBaseJava.setCommonProperty(commonProperty);
         // 此处可不使用mybatis框架，换成原生jdbc
-        analyzeTableColumn(templateBaseJava, commonProperty.getTableName(), commonProperty.getDatabaseName());
+        analyzeTableColumn(templateBaseJava, drive, url, user, password, tableName);
         generateBaseJava(templateBaseJava);
         /** 解析mysql表字段，生成 BaseDto.java实体文件 end   */
 
@@ -102,7 +112,7 @@ public class GenerateMain {
         /** 生成基础 BaseMapper.java 接口 和 BaseMapper.xml 接口映射 文件 start */
         TemplateBaseMapper templateBaseMapper = new TemplateBaseMapper();
         // 读取BaseCrudMapper接口所在的包地址
-        templateBaseMapper.setFatherPackage(readByName("baseCrudMapperPath"));
+        templateBaseMapper.setFatherPackage(commonProperty.getBaseCrudMapper());
         templateBaseMapper.setCommonProperty(commonProperty);
 
         TemplateBaseMapperXml templateBaseMapperXml = new TemplateBaseMapperXml();
@@ -250,10 +260,13 @@ public class GenerateMain {
      * @param tableName
      * @throws Exception
      */
-    public void analyzeTableColumn(TemplateBaseJava templateBaseJava ,String tableName, String databaseName) throws Exception{
+    public void analyzeTableColumn(TemplateBaseJava templateBaseJava, String drive, String url, String user, String password,String tableName) throws Exception{
         /**** 此处可换成原生jdbc start ****/
-        TableSchemaMapper mapper = (TableSchemaMapper) MapperUtil.getMapper(TableSchemaMapper.class);
-        List<TableSchemaPo> list =  mapper.select(tableName, databaseName);
+//        TableSchemaMapper mapper = (TableSchemaMapper) MapperUtil.getMapper(TableSchemaMapper.class);
+//        List<TableSchemaPo> list =  mapper.select(tableName, databaseName);
+        /**** 原生jdbc start ****/
+        List<TableSchemaPo> list = this.getDbData(url, drive, user, password, tableName);
+
         /**** 此处可换成原生jdbc end ****/
         if (list.size() == 0){
             throw new RuntimeException(tableName + "表不存在，或" + tableName + "表字段无字段");
@@ -281,6 +294,35 @@ public class GenerateMain {
         }
         templateBaseJava.setImportJavapackage(importJavapackage);
         templateBaseJava.setColumnBos(columnBoList);
+    }
+
+    /**
+     * 获取数据库映射数据
+     *
+     * @param url
+     * @param drive
+     * @param password
+     * @return
+     */
+    private List<TableSchemaPo> getDbData(String url, String drive, String user, String password, String tableName) throws SQLException, ClassNotFoundException {
+        // 查询sql
+        String sql = "select `data_type`, `column_name`, `column_comment` FROM information_schema.columns where table_name = ?";
+
+        PreparedStatement preparedStatement = DBUtil.getConnection(drive, url, user, password).prepareStatement(sql);
+        preparedStatement.setString(1, tableName);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        // 不能把student在循环外面创建，要不list里面六个对象都是一样的，都是最后一个的值，
+        // 因为list add进去的都是引用
+        var list = new ArrayList<TableSchemaPo>();
+        while (resultSet.next()) {
+            TableSchemaPo po = new TableSchemaPo();
+            po.setDataType(resultSet.getString(1));
+            po.setColumnName(resultSet.getString(2));
+
+            po.setColumnComment(resultSet.getString(3));
+            list.add(po);
+        }
+        return list;
     }
 
     /**

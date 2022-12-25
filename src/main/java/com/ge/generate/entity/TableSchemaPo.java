@@ -1,4 +1,4 @@
-package com.ge.mybatis.entity;
+package com.ge.generate.entity;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -24,4 +24,9 @@ public class TableSchemaPo {
      * 字段注释
      */
     private String columnComment;
+
+    /**
+     * 字段关键字
+     */
+    private boolean columnKey = false;
 }
