@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
-<#list importJavapackage as javapackage>
+<#list importJavaPackage as javapackage>
 import ${javapackage};
 </#list>
 /**
@@ -15,10 +15,14 @@ import ${javapackage};
 @Getter
 @Setter
 public class ${fileName} implements Serializable {
+
     private static final long serialVersionUID = 19970718L;
     <#list columnBos as columnBo>
 
     /** ${columnBo.comment} */
+    <#list columnBo.rs as r>
+    ${r}
+    </#list>
     private ${columnBo.javaType} ${columnBo.javaName};
     </#list>
 }

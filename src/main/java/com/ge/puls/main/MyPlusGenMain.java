@@ -5,10 +5,7 @@ import com.ge.generate.entity.ColumnBo;
 import com.ge.generate.entity.TableSchemaPo;
 import com.ge.generate.utils.MysqlUtil;
 import com.ge.generate.utils.StringUtil;
-import com.ge.puls.entity.Column;
-import com.ge.puls.entity.PlusProperty;
-import com.ge.puls.entity.TableSchema;
-import com.ge.puls.entity.XmlTpl;
+import com.ge.puls.entity.*;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -30,6 +27,8 @@ public class MyPlusGenMain {
     final static String FTL_PATH = "/template/plus/";
     // XML 模板
     final static String FTL_XML = "PlusMapperXml.xml.ftl";
+    // 实体 模板
+    final static String FTL_JAVA = "PlusJava.java.ftl";
 
     // 创建时间字段
     final static String CREATE_TIME = "create_time";
@@ -136,7 +135,7 @@ public class MyPlusGenMain {
     /**
      * 生成 entity文件
      */
-    private void genEntity() throws SQLException, ClassNotFoundException {
+    private void genEntity() throws SQLException, ClassNotFoundException, IOException, TemplateException {
         // 获取字段属性
         List<TableSchema> list = this.getDbData(commonProperty.getUrl(), commonProperty.getDrive(), commonProperty.getUser(), commonProperty.getPassword(), commonProperty.getTableName());
 
@@ -169,9 +168,9 @@ public class MyPlusGenMain {
                 rsList.add("@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)");
                 rsList.add("@JsonFormat(pattern = \"yyyy-MM-dd HH:mm:ss\",timezone=\"GMT+8\")");
 
-                importJavaPackage.add("import com.baomidou.mybatisplus.annotation.*;");
-                importJavaPackage.add("import com.fasterxml.jackson.annotation.JsonFormat;");
-                importJavaPackage.add("import org.springframework.format.annotation.DateTimeFormat;");
+                importJavaPackage.add("com.baomidou.mybatisplus.annotation.*;");
+                importJavaPackage.add("com.fasterxml.jackson.annotation.JsonFormat;");
+                importJavaPackage.add("org.springframework.format.annotation.DateTimeFormat;");
 
             } else if (UPDATE_TIME.equals(bo.getJdbcName())) {
                 // 修改时间
@@ -179,25 +178,55 @@ public class MyPlusGenMain {
                 rsList.add("@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)");
                 rsList.add("@JsonFormat(pattern = \"yyyy-MM-dd HH:mm:ss\",timezone=\"GMT+8\")");
 
-                importJavaPackage.add("import com.baomidou.mybatisplus.annotation.*;");
-                importJavaPackage.add("import com.fasterxml.jackson.annotation.JsonFormat;");
-                importJavaPackage.add("import org.springframework.format.annotation.DateTimeFormat;");
+                importJavaPackage.add("com.baomidou.mybatisplus.annotation.*;");
+                importJavaPackage.add("com.fasterxml.jackson.annotation.JsonFormat;");
+                importJavaPackage.add("org.springframework.format.annotation.DateTimeFormat;");
             } else if (IS_DELETE.equals(bo.getJdbcName())) {
                 // 删除标记
                 rsList.add("@TableLogic(value = \"" + UN_DELETE +"\", delval = \"" + DELETE_VAL + "\")");
 
-                importJavaPackage.add("import com.baomidou.mybatisplus.annotation.*;");
+                importJavaPackage.add("com.baomidou.mybatisplus.annotation.*;");
             }
 
             if (po.isColumnKey()) {
                 // 主键
                 rsList.add("@TableId(value = \"" + po.getColumnName() + "\", type = IdType.AUTO)");
-                importJavaPackage.add("import com.baomidou.mybatisplus.annotation.*;");
+                importJavaPackage.add("com.baomidou.mybatisplus.annotation.*;");
             }
             bo.setRs(rsList);
             columnBoList.add(bo);
         }
-        System.out.println();
+
+        List<String> importJavaPackageList = new ArrayList<>();
+        importJavaPackageList.addAll(importJavaPackage);
+
+        // 生成java文件
+        var tpl = new JavaTpl();
+
+        // 类名
+        tpl.setFileName(commonProperty.getUpperTableName());
+        // 包名
+        tpl.setPackageName(commonProperty.getFullPackagePath());
+        // 公共配置
+        tpl.setCommonProperty(commonProperty);
+
+        tpl.setImportJavaPackage(importJavaPackageList);
+        tpl.setColumnBos(columnBoList);
+
+        // 要生成java文件所在的全相对地址
+        String fileFullName = commonProperty.getJavaPath() + "/"
+                + tpl.getPackageName().replace(".", "/") + "/" + tpl.getFileName() + ".java";
+
+        Template xmlTemplate = this.getGenConfig().getTemplate(FTL_JAVA);
+        File xmlFile = new File(fileFullName);
+        File xmlParentFile = xmlFile.getParentFile();
+        // 创建文件目录
+        if (!xmlParentFile.exists()) {
+            xmlParentFile.mkdirs();
+        }
+        // 生成base mapper xml文件
+        xmlTemplate.process(tpl, new FileWriter(xmlFile));
+
     }
 
     /**
