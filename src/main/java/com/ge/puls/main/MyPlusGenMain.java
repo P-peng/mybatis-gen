@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLOutput;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -29,6 +30,8 @@ public class MyPlusGenMain {
     final static String FTL_XML = "PlusMapperXml.xml.ftl";
     // 实体 模板
     final static String FTL_JAVA = "PlusJava.java.ftl";
+    // Mapper 模板
+    final static String FTL_MAPPER = "PlusMapper.java.ftl";
 
     // 创建时间字段
     final static String CREATE_TIME = "create_time";
@@ -120,14 +123,17 @@ public class MyPlusGenMain {
 
         /** 生成 entity文件 start **/
         this.genEntity();
+        System.out.println("***** 生成Entity成功 ***** ");
         /** 生成 entity文件 end **/
 
         /** 生成 xml文件 start **/
         this.genXml();
+        System.out.println("***** 生成Xml成功 ***** ");
         /** 生成 xml文件 end **/
 
         /** 生成 mapper文件 start **/
-//        this.genMapper();
+        this.genMapper();
+        System.out.println("***** 生成Mapper成功 ***** ");
         /** 生成 mapper文件 end **/
 
     }
@@ -168,9 +174,9 @@ public class MyPlusGenMain {
                 rsList.add("@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)");
                 rsList.add("@JsonFormat(pattern = \"yyyy-MM-dd HH:mm:ss\",timezone=\"GMT+8\")");
 
-                importJavaPackage.add("com.baomidou.mybatisplus.annotation.*;");
-                importJavaPackage.add("com.fasterxml.jackson.annotation.JsonFormat;");
-                importJavaPackage.add("org.springframework.format.annotation.DateTimeFormat;");
+                importJavaPackage.add("com.baomidou.mybatisplus.annotation.*");
+                importJavaPackage.add("com.fasterxml.jackson.annotation.JsonFormat");
+                importJavaPackage.add("org.springframework.format.annotation.DateTimeFormat");
 
             } else if (UPDATE_TIME.equals(bo.getJdbcName())) {
                 // 修改时间
@@ -178,20 +184,20 @@ public class MyPlusGenMain {
                 rsList.add("@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)");
                 rsList.add("@JsonFormat(pattern = \"yyyy-MM-dd HH:mm:ss\",timezone=\"GMT+8\")");
 
-                importJavaPackage.add("com.baomidou.mybatisplus.annotation.*;");
-                importJavaPackage.add("com.fasterxml.jackson.annotation.JsonFormat;");
-                importJavaPackage.add("org.springframework.format.annotation.DateTimeFormat;");
+                importJavaPackage.add("com.baomidou.mybatisplus.annotation.*");
+                importJavaPackage.add("com.fasterxml.jackson.annotation.JsonFormat");
+                importJavaPackage.add("org.springframework.format.annotation.DateTimeFormat");
             } else if (IS_DELETE.equals(bo.getJdbcName())) {
                 // 删除标记
                 rsList.add("@TableLogic(value = \"" + UN_DELETE +"\", delval = \"" + DELETE_VAL + "\")");
 
-                importJavaPackage.add("com.baomidou.mybatisplus.annotation.*;");
+                importJavaPackage.add("com.baomidou.mybatisplus.annotation.*");
             }
 
             if (po.isColumnKey()) {
                 // 主键
                 rsList.add("@TableId(value = \"" + po.getColumnName() + "\", type = IdType.AUTO)");
-                importJavaPackage.add("com.baomidou.mybatisplus.annotation.*;");
+                importJavaPackage.add("com.baomidou.mybatisplus.annotation.*");
             }
             bo.setRs(rsList);
             columnBoList.add(bo);
@@ -206,7 +212,7 @@ public class MyPlusGenMain {
         // 类名
         tpl.setFileName(commonProperty.getUpperTableName());
         // 包名
-        tpl.setPackageName(commonProperty.getFullPackagePath());
+        tpl.setPackageName(commonProperty.getFullPackagePath() + ".entity");
         // 公共配置
         tpl.setCommonProperty(commonProperty);
 
@@ -232,7 +238,40 @@ public class MyPlusGenMain {
     /**
      * 生成 mapper.java
      */
-    private void genMapper() {
+    private void genMapper() throws IOException, TemplateException {
+        MapperTpl tpl = new MapperTpl();
+        // 包名
+        tpl.setPackageName(commonProperty.getFullPackagePath() + ".mapper");
+        // 引包
+        List<String> importJavaPackage = new ArrayList<>();
+        // plus包
+        importJavaPackage.add("com.baomidou.mybatisplus.core.mapper.BaseMapper");
+        // 实体包
+        importJavaPackage.add(commonProperty.getFullPackagePath() + ".entity" + "." + commonProperty.getUpperTableName() );
+        tpl.setImportJavaPackage(importJavaPackage);
+        // 公共属性
+        tpl.setCommonProperty(commonProperty);
+        // 类名
+        tpl.setClassName(commonProperty.getUpperTableName() + "Mapper");
+        // 继承的父类 mybatis-plus
+        tpl.setFatherName("BaseMapper");
+
+        // 实体类泛形
+        tpl.setEntityName(commonProperty.getUpperTableName());
+
+        // 要生成java文件所在的全相对地址
+        String fileFullName = commonProperty.getJavaPath() + "/"
+                + tpl.getPackageName().replace(".", "/") + "/" + tpl.getClassName() + ".java";
+
+        Template xmlTemplate = this.getGenConfig().getTemplate(FTL_MAPPER);
+        File xmlFile = new File(fileFullName);
+        File xmlParentFile = xmlFile.getParentFile();
+        // 创建文件目录
+        if (!xmlParentFile.exists()) {
+            xmlParentFile.mkdirs();
+        }
+        // 生成base mapper xml文件
+        xmlTemplate.process(tpl, new FileWriter(xmlFile));
     }
 
     /**

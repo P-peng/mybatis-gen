@@ -1,8 +1,9 @@
 package ${packageName};
 
 <#list importJavaPackage as javaPackage>
- import ${javaPackage};
+import ${javaPackage};
 </#list>
+
 /**
  * @author ${commonProperty.author}
  * @date ${commonProperty.date}
