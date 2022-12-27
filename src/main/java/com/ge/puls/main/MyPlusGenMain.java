@@ -30,21 +30,27 @@ public class MyPlusGenMain {
     final static String FTL_XML = "PlusMapperXml.xml.ftl";
     // 实体 模板
     final static String FTL_JAVA = "PlusJava.java.ftl";
+    // 实体 OUT 模板
+    final static String FTL_JAVA_OUT = "PlusJavaOut.java.ftl";
+    // 实体 PAGE IN 模板
+    final static String FTL_JAVA_PAGE_IN = "PlusJavaPageIn.java.ftl";
     // Mapper 模板
     final static String FTL_MAPPER = "PlusMapper.java.ftl";
+    // Mapper 模板
+    final static String FTL_SERVICE = "PlusService.java.ftl";
+    // Mapper 模板
+    final static String FTL_IMPL = "PlusImpl.java.ftl";
+    // Mapper 模板
+    final static String FTL_CONTROLLER = "PlusController.java.ftl";
 
     // 创建时间字段
     final static String CREATE_TIME = "create_time";
-
     // 修改时间时间字段
     final static String UPDATE_TIME = "update_time";
-
     // 删除标记字段
     final static String IS_DELETE = "is_delete";
-
     // 删除标记字段
     final static String DELETE_VAL = "1";
-
     // 删除标记字段
     final static String UN_DELETE = "0";
 
@@ -79,6 +85,32 @@ public class MyPlusGenMain {
         // xml目录
         var mapperPath = modulePath + "/resources/mappers";
 
+        // In java继承的类
+        // 分页继承类
+        var inFatherClass = "TokenBaseIn";
+        var inFatherClassPackage = "com.et.load.modules.entity.base.TokenBaseIn";
+        var inFatherPageClass = "TokenPageBaseIn";
+        var inFatherPageClassPackage = "com.et.load.modules.entity.base.TokenPageBaseIn";
+
+        // service类配置
+        // 实体vo
+        var vo = "ResultVo";
+        // 实体vo包
+        var voPackage = "com.et.load.core.base.ResultVo";
+        // 实体分页vo
+        var pageVo = "PageOut";
+        // 实体分页vo包
+        var pageVoPackage = "com.et.load.modules.entity.base.PageOut";
+        // service 继承类
+        var serviceFatherName = "IService";
+        // service 继承包
+        var serviceFatherNamePackage = "com.baomidou.mybatisplus.extension.service.IService";
+        // service 继承类
+        var implFatherName = "ServiceImpl";
+        // service 继承包
+        var implFatherNamePackage = "com.baomidou.mybatisplus.extension.service.impl.ServiceImpl";
+
+
         // 配置文件
         var commonProperty = new PlusProperty();
         commonProperty.setDrive(drive);
@@ -94,6 +126,20 @@ public class MyPlusGenMain {
         commonProperty.setMapperPath(mapperPath);
         commonProperty.setJavaPath(javaPath);
         commonProperty.setDate(new SimpleDateFormat("yyyy/MM/dd").format(new Date()));
+        // 入参配置文件
+        commonProperty.setInFatherClass(inFatherClass);
+        commonProperty.setInFatherClassPackage(inFatherClassPackage);
+        commonProperty.setInFatherPageClass(inFatherPageClass);
+        commonProperty.setInFatherPageClassPackage(inFatherPageClassPackage);
+        // service类配置
+        commonProperty.setVo(vo);
+        commonProperty.setVoPackage(voPackage);
+        commonProperty.setPageVo(pageVo);
+        commonProperty.setPageVoPackage(pageVoPackage);
+        commonProperty.setServiceFatherName(serviceFatherName);
+        commonProperty.setServiceFatherNamePackage(serviceFatherNamePackage);
+        commonProperty.setImplFatherName(implFatherName);
+        commonProperty.setImplFatherNamePackage(implFatherNamePackage);
 
         var main = new MyPlusGenMain();
         main.commonProperty = commonProperty;
@@ -113,12 +159,13 @@ public class MyPlusGenMain {
         commonProperty.setUpperTableName(StringUtil.toUpperCaseFirstOne(commonProperty.getHumpTableName()));
     }
 
-    public void run() throws IOException, TemplateException, SQLException, ClassNotFoundException {
+    public void run() throws Exception {
         this.setProperty();
         if (commonProperty == null) {
             System.out.println("配置为空");
             return;
         }
+
 
 
         /** 生成 entity文件 start **/
@@ -136,6 +183,506 @@ public class MyPlusGenMain {
         System.out.println("***** 生成Mapper成功 ***** ");
         /** 生成 mapper文件 end **/
 
+        /** 生成 entity out 文件 start **/
+        this.genEntityOut();
+        System.out.println("***** 生成Entity Out 成功 ***** ");
+        /** 生成 entity文件 end **/
+
+        /** 生成 Entity Page In 文件 start **/
+        this.genEntityPageIn();
+        System.out.println("***** 生成Entity Page In 成功 ***** ");
+        /** 生成 Entity Page In 文件 end **/
+
+        /** 生成 Entity Page In 文件 start **/
+        this.genEntityIn();
+        System.out.println("***** 生成Entity In 成功 ***** ");
+        /** 生成 Entity Page In 文件 end **/
+
+        /** 生成 Entity Page In 文件 start **/
+        this.genService();
+        System.out.println("***** 生成Service 成功 ***** ");
+        /** 生成 Entity Page In 文件 end **/
+
+        /** 生成 Entity Page In 文件 start **/
+        this.genImpl();
+        System.out.println("***** 生成Impl 成功 ***** ");
+        /** 生成 Entity Page In 文件 end **/
+
+        /** 生成 Entity Page In 文件 start **/
+        this.genController();
+        System.out.println("***** 生成Controller 成功 ***** ");
+        /** 生成 Entity Page In 文件 end **/
+
+    }
+
+    private void genController() throws Exception{
+        List<String> importJavaPackageList = new ArrayList<>();
+
+
+        // 生成java entity 文件
+        var tpl = new JavaControllerTpl();
+        // 包名
+        tpl.setPackageName(commonProperty.getFullPackagePath() + ".controller");
+        // 类名
+        tpl.setClassName( "I" + commonProperty.getUpperTableName() + "Controller");
+
+        // 父类
+        tpl.setFatherName(commonProperty.getServiceFatherName());
+        importJavaPackageList.add(commonProperty.getServiceFatherNamePackage());
+        // 泛形
+        tpl.setEntityName(commonProperty.getJavaTpl().getClassName());
+        importJavaPackageList.add(commonProperty.getJavaTpl().getPackageName()+ "." + commonProperty.getJavaTpl().getClassName());
+        // vo实体
+        tpl.setVo(commonProperty.getVo());
+        importJavaPackageList.add(commonProperty.getVoPackage());
+        // 分页vo实体
+        tpl.setPageVo(commonProperty.getPageVo());
+        importJavaPackageList.add(commonProperty.getPageVoPackage());
+        // 分页出参实体
+        tpl.setPageOutName(commonProperty.getJavaOutTpl().getClassName());
+        importJavaPackageList.add(commonProperty.getJavaOutTpl().getPackageName()+ "." + commonProperty.getJavaOutTpl().getClassName());
+        // 分页入参实体
+        tpl.setPageInName(commonProperty.getJavaPageInTpl().getClassName());
+        importJavaPackageList.add(commonProperty.getJavaPageInTpl().getPackageName()+ "." + commonProperty.getJavaPageInTpl().getClassName());
+        // 入参实体
+        tpl.setInName(commonProperty.getJavaInTpl().getClassName());
+        importJavaPackageList.add(commonProperty.getJavaInTpl().getPackageName()+ "." + commonProperty.getJavaInTpl().getClassName());
+        // 引包
+
+        // 保存类信息
+        commonProperty.setJavaControllerTpl(tpl);
+        // 公共配置
+        tpl.setCommonProperty(commonProperty);
+
+        tpl.setImportJavaPackage(importJavaPackageList);
+
+
+        // 要生成java文件所在的全相对地址
+        String fileFullName = commonProperty.getJavaPath() + "/"
+                + tpl.getPackageName().replace(".", "/") + "/" + tpl.getClassName() + ".java";
+
+        Template xmlTemplate = this.getGenConfig().getTemplate(FTL_CONTROLLER);
+        File xmlFile = new File(fileFullName);
+        File xmlParentFile = xmlFile.getParentFile();
+        // 创建文件目录
+        if (!xmlParentFile.exists()) {
+            xmlParentFile.mkdirs();
+        }
+        // 生成base mapper xml文件
+        xmlTemplate.process(tpl, new FileWriter(xmlFile));
+    }
+
+    private void genImpl() throws Exception{
+        List<String> importJavaPackageList = new ArrayList<>();
+
+
+        // 生成java entity 文件
+        var tpl = new JavaImplTpl();
+        // 包名
+        tpl.setPackageName(commonProperty.getFullPackagePath() + ".service.impl");
+        // 类名
+        tpl.setClassName(commonProperty.getUpperTableName() + "ServiceImpl");
+
+        // 父类
+        tpl.setFatherName(commonProperty.getServiceFatherName());
+        importJavaPackageList.add(commonProperty.getServiceFatherNamePackage());
+        // 泛形
+        tpl.setEntityName(commonProperty.getJavaTpl().getClassName());
+        importJavaPackageList.add(commonProperty.getJavaTpl().getPackageName()+ "." + commonProperty.getJavaTpl().getClassName());
+        // vo实体
+        tpl.setVo(commonProperty.getVo());
+        importJavaPackageList.add(commonProperty.getVoPackage());
+        // 分页vo实体
+        tpl.setPageVo(commonProperty.getPageVo());
+        importJavaPackageList.add(commonProperty.getPageVoPackage());
+        // 分页出参实体
+        tpl.setPageOutName(commonProperty.getJavaOutTpl().getClassName());
+        importJavaPackageList.add(commonProperty.getJavaOutTpl().getPackageName()+ "." + commonProperty.getJavaOutTpl().getClassName());
+        // 分页入参实体
+        tpl.setPageInName(commonProperty.getJavaPageInTpl().getClassName());
+        importJavaPackageList.add(commonProperty.getJavaPageInTpl().getPackageName()+ "." + commonProperty.getJavaPageInTpl().getClassName());
+        // 入参实体
+        tpl.setInName(commonProperty.getJavaInTpl().getClassName());
+        importJavaPackageList.add(commonProperty.getJavaInTpl().getPackageName()+ "." + commonProperty.getJavaInTpl().getClassName());
+        // mapper
+        tpl.setMapperName(commonProperty.getMapperTpl().getClassName());
+        importJavaPackageList.add(commonProperty.getMapperTpl().getPackageName()+ "." + commonProperty.getMapperTpl().getClassName());
+        // service
+        tpl.setServiceName(commonProperty.getJavaServiceTpl().getClassName());
+        importJavaPackageList.add(commonProperty.getJavaServiceTpl().getPackageName()+ "." + commonProperty.getJavaServiceTpl().getClassName());
+        // 分页包
+        importJavaPackageList.add("com.baomidou.mybatisplus.extension.plugins.pagination.Page");
+        // 表关键字函数
+        tpl.setKeyFunc("get" + StringUtil.toUpperCaseFirstOne(commonProperty.getColumnJavaKey()) + "()");
+
+        // 保存类信息
+        commonProperty.setJavaImplTpl(tpl);
+        // 公共配置
+        tpl.setCommonProperty(commonProperty);
+
+        tpl.setImportJavaPackage(importJavaPackageList);
+
+
+        // 要生成java文件所在的全相对地址
+        String fileFullName = commonProperty.getJavaPath() + "/"
+                + tpl.getPackageName().replace(".", "/") + "/" + tpl.getClassName() + ".java";
+
+        Template xmlTemplate = this.getGenConfig().getTemplate(FTL_IMPL);
+        File xmlFile = new File(fileFullName);
+        File xmlParentFile = xmlFile.getParentFile();
+        // 创建文件目录
+        if (!xmlParentFile.exists()) {
+            xmlParentFile.mkdirs();
+        }
+        // 生成base mapper xml文件
+        xmlTemplate.process(tpl, new FileWriter(xmlFile));
+    }
+
+    private void genService() throws Exception{
+        List<String> importJavaPackageList = new ArrayList<>();
+
+
+        // 生成java entity 文件
+        var tpl = new JavaServiceTpl();
+        // 包名
+        tpl.setPackageName(commonProperty.getFullPackagePath() + ".service");
+        // 类名
+        tpl.setClassName( "I" + commonProperty.getUpperTableName() + "Service");
+
+        // 父类
+        tpl.setFatherName(commonProperty.getServiceFatherName());
+        importJavaPackageList.add(commonProperty.getServiceFatherNamePackage());
+        // 泛形
+        tpl.setEntityName(commonProperty.getJavaTpl().getClassName());
+        importJavaPackageList.add(commonProperty.getJavaTpl().getPackageName()+ "." + commonProperty.getJavaTpl().getClassName());
+        // vo实体
+        tpl.setVo(commonProperty.getVo());
+        importJavaPackageList.add(commonProperty.getVoPackage());
+        // 分页vo实体
+        tpl.setPageVo(commonProperty.getPageVo());
+        importJavaPackageList.add(commonProperty.getPageVoPackage());
+        // 分页出参实体
+        tpl.setPageOutName(commonProperty.getJavaOutTpl().getClassName());
+        importJavaPackageList.add(commonProperty.getJavaOutTpl().getPackageName()+ "." + commonProperty.getJavaOutTpl().getClassName());
+        // 分页入参实体
+        tpl.setPageInName(commonProperty.getJavaPageInTpl().getClassName());
+        importJavaPackageList.add(commonProperty.getJavaPageInTpl().getPackageName()+ "." + commonProperty.getJavaPageInTpl().getClassName());
+        // 入参实体
+        tpl.setInName(commonProperty.getJavaInTpl().getClassName());
+        importJavaPackageList.add(commonProperty.getJavaInTpl().getPackageName()+ "." + commonProperty.getJavaInTpl().getClassName());
+        // 引包
+
+        // 保存类信息
+        commonProperty.setJavaServiceTpl(tpl);
+        // 公共配置
+        tpl.setCommonProperty(commonProperty);
+
+        tpl.setImportJavaPackage(importJavaPackageList);
+
+
+        // 要生成java文件所在的全相对地址
+        String fileFullName = commonProperty.getJavaPath() + "/"
+                + tpl.getPackageName().replace(".", "/") + "/" + tpl.getClassName() + ".java";
+
+        Template xmlTemplate = this.getGenConfig().getTemplate(FTL_SERVICE);
+        File xmlFile = new File(fileFullName);
+        File xmlParentFile = xmlFile.getParentFile();
+        // 创建文件目录
+        if (!xmlParentFile.exists()) {
+            xmlParentFile.mkdirs();
+        }
+        // 生成base mapper xml文件
+        xmlTemplate.process(tpl, new FileWriter(xmlFile));
+    }
+
+    /**
+     * 分页入参
+     */
+    private void genEntityIn() throws IOException, TemplateException {
+        List<TableSchema> list = commonProperty.getColumnList();
+        List<Column> columnBoList = new ArrayList<>();
+        Set<String> importJavaPackage = new HashSet<>();
+        for (TableSchema po : list) {
+            var bo = new Column();
+            // 下滑线_命名法转为驼峰命名
+            bo.setJavaName(StringUtil.underlineToHump(po.getColumnName()));
+            // 分析对应的java类型
+            bo.setJavaType(MysqlUtil.analyzeColumnName(po.getDataType()));
+            // 分析对应所在的java包
+            bo.setJavaPackage(MysqlUtil.analyzeColumnJavaPackage(po.getDataType()));
+            // 分析mybatis字段类型
+            bo.setJdbcType(MysqlUtil.analyzeColumnJdbcType(po.getDataType()));
+            bo.setJdbcName(po.getColumnName());
+            // 注释
+            bo.setComment(po.getColumnComment());
+            // 分析是否属于java.lang的包
+            if (bo.getJavaPackage().indexOf("java.lang") < 0){
+                importJavaPackage.add(bo.getJavaPackage());
+            }
+
+            Set<String> rsList = new HashSet<>();
+            // 分析是否要注解
+            if (CREATE_TIME.equals(bo.getJdbcName())) {
+                // 创建时间 注解
+//                rsList.add("@TableField(value = \"create_time\", fill = FieldFill.INSERT)");
+//                rsList.add("@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)");
+//                rsList.add("@JsonFormat(pattern = \"yyyy-MM-dd HH:mm:ss\",timezone=\"GMT+8\")");
+
+//                importJavaPackage.add("com.baomidou.mybatisplus.annotation.*");
+//                importJavaPackage.add("org.springframework.format.annotation.DateTimeFormat");
+//                importJavaPackage.add("com.fasterxml.jackson.annotation.JsonFormat");
+                continue;
+
+            } else if (UPDATE_TIME.equals(bo.getJdbcName())) {
+                // 修改时间
+//                rsList.add("@TableField(value = \"create_time\", fill = FieldFill.UPDATE)");
+//                rsList.add("@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)");
+//                rsList.add("@JsonFormat(pattern = \"yyyy-MM-dd HH:mm:ss\",timezone=\"GMT+8\")");
+
+//                importJavaPackage.add("com.baomidou.mybatisplus.annotation.*");
+//                importJavaPackage.add("org.springframework.format.annotation.DateTimeFormat");
+//                importJavaPackage.add("com.fasterxml.jackson.annotation.JsonFormat");
+                continue;
+            } else if (IS_DELETE.equals(bo.getJdbcName())) {
+                continue;
+            }
+
+            // 只要LocalDateTime字段，加上时间注解
+            if ("LocalDateTime".equals(bo.getJavaType())) {
+                rsList.add("@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)");
+                importJavaPackage.add("org.springframework.format.annotation.DateTimeFormat");
+            }
+
+            List<String> rs = new ArrayList<>();
+            rs.addAll(rsList);
+            bo.setRs(rs);
+            columnBoList.add(bo);
+        }
+
+        List<String> importJavaPackageList = new ArrayList<>();
+        importJavaPackageList.addAll(importJavaPackage);
+
+        // 生成java entity 文件
+        var tpl = new JavaPageInTpl();
+        // 类名
+        tpl.setClassName(commonProperty.getUpperTableName() + "In");
+        // 包名
+        tpl.setPackageName(commonProperty.getFullPackagePath() + ".entity.in");
+        // 父类
+        tpl.setFatherName(commonProperty.getInFatherClass());
+        // 父类包名
+        importJavaPackageList.add(commonProperty.getInFatherClassPackage());
+        // 保存类信息
+        commonProperty.setJavaInTpl(tpl);
+        // 公共配置
+        tpl.setCommonProperty(commonProperty);
+
+        tpl.setImportJavaPackage(importJavaPackageList);
+        tpl.setColumnBos(columnBoList);
+
+        // 要生成java文件所在的全相对地址
+        String fileFullName = commonProperty.getJavaPath() + "/"
+                + tpl.getPackageName().replace(".", "/") + "/" + tpl.getClassName() + ".java";
+
+        Template xmlTemplate = this.getGenConfig().getTemplate(FTL_JAVA_PAGE_IN);
+        File xmlFile = new File(fileFullName);
+        File xmlParentFile = xmlFile.getParentFile();
+        // 创建文件目录
+        if (!xmlParentFile.exists()) {
+            xmlParentFile.mkdirs();
+        }
+        // 生成base mapper xml文件
+        xmlTemplate.process(tpl, new FileWriter(xmlFile));
+    }
+
+    /**
+     * 分页入参
+     */
+    private void genEntityPageIn() throws IOException, TemplateException {
+        List<TableSchema> list = commonProperty.getColumnList();
+        List<Column> columnBoList = new ArrayList<>();
+        Set<String> importJavaPackage = new HashSet<>();
+        for (TableSchema po : list) {
+            var bo = new Column();
+            // 下滑线_命名法转为驼峰命名
+            bo.setJavaName(StringUtil.underlineToHump(po.getColumnName()));
+            // 分析对应的java类型
+            bo.setJavaType(MysqlUtil.analyzeColumnName(po.getDataType()));
+            // 分析对应所在的java包
+            bo.setJavaPackage(MysqlUtil.analyzeColumnJavaPackage(po.getDataType()));
+            // 分析mybatis字段类型
+            bo.setJdbcType(MysqlUtil.analyzeColumnJdbcType(po.getDataType()));
+            bo.setJdbcName(po.getColumnName());
+            // 注释
+            bo.setComment(po.getColumnComment());
+            // 分析是否属于java.lang的包
+            if (bo.getJavaPackage().indexOf("java.lang") < 0){
+                importJavaPackage.add(bo.getJavaPackage());
+            }
+
+            Set<String> rsList = new HashSet<>();
+            // 分析是否要注解
+            if (CREATE_TIME.equals(bo.getJdbcName())) {
+                // 创建时间 注解
+//                rsList.add("@TableField(value = \"create_time\", fill = FieldFill.INSERT)");
+                rsList.add("@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)");
+//                rsList.add("@JsonFormat(pattern = \"yyyy-MM-dd HH:mm:ss\",timezone=\"GMT+8\")");
+
+//                importJavaPackage.add("com.baomidou.mybatisplus.annotation.*");
+                importJavaPackage.add("org.springframework.format.annotation.DateTimeFormat");
+//                importJavaPackage.add("com.fasterxml.jackson.annotation.JsonFormat");
+
+
+            } else if (UPDATE_TIME.equals(bo.getJdbcName())) {
+                // 修改时间
+//                rsList.add("@TableField(value = \"create_time\", fill = FieldFill.UPDATE)");
+                rsList.add("@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)");
+//                rsList.add("@JsonFormat(pattern = \"yyyy-MM-dd HH:mm:ss\",timezone=\"GMT+8\")");
+
+//                importJavaPackage.add("com.baomidou.mybatisplus.annotation.*");
+                importJavaPackage.add("org.springframework.format.annotation.DateTimeFormat");
+//                importJavaPackage.add("com.fasterxml.jackson.annotation.JsonFormat");
+
+            } else if (IS_DELETE.equals(bo.getJdbcName())) {
+                continue;
+            }
+
+            // 只要LocalDateTime字段，加上时间注解
+            if ("LocalDateTime".equals(bo.getJavaType())) {
+                rsList.add("@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)");
+                importJavaPackage.add("org.springframework.format.annotation.DateTimeFormat");
+            }
+
+            List<String> rs = new ArrayList<>();
+            rs.addAll(rsList);
+            bo.setRs(rs);
+            columnBoList.add(bo);
+        }
+
+        List<String> importJavaPackageList = new ArrayList<>();
+        importJavaPackageList.addAll(importJavaPackage);
+
+        // 生成java entity 文件
+        var tpl = new JavaPageInTpl();
+        // 类名
+        tpl.setClassName(commonProperty.getUpperTableName() + "PageIn");
+        // 包名
+        tpl.setPackageName(commonProperty.getFullPackagePath() + ".entity.in");
+        // 父类
+        tpl.setFatherName(commonProperty.getInFatherPageClass());
+        // 父类包名
+        importJavaPackageList.add(commonProperty.getInFatherPageClassPackage());
+        // 保存类信息
+        commonProperty.setJavaPageInTpl(tpl);
+
+        // 公共配置
+        tpl.setCommonProperty(commonProperty);
+
+        tpl.setImportJavaPackage(importJavaPackageList);
+        tpl.setColumnBos(columnBoList);
+
+        // 要生成java文件所在的全相对地址
+        String fileFullName = commonProperty.getJavaPath() + "/"
+                + tpl.getPackageName().replace(".", "/") + "/" + tpl.getClassName() + ".java";
+
+        Template xmlTemplate = this.getGenConfig().getTemplate(FTL_JAVA_PAGE_IN);
+        File xmlFile = new File(fileFullName);
+        File xmlParentFile = xmlFile.getParentFile();
+        // 创建文件目录
+        if (!xmlParentFile.exists()) {
+            xmlParentFile.mkdirs();
+        }
+        // 生成base mapper xml文件
+        xmlTemplate.process(tpl, new FileWriter(xmlFile));
+    }
+
+    /**
+     * 生成实体
+     */
+    private void genEntityOut() throws IOException, TemplateException {
+        List<TableSchema> list = commonProperty.getColumnList();
+        List<Column> columnBoList = new ArrayList<>();
+        Set<String> importJavaPackage = new HashSet<>();
+        for (TableSchema po : list) {
+            var bo = new Column();
+            // 下滑线_命名法转为驼峰命名
+            bo.setJavaName(StringUtil.underlineToHump(po.getColumnName()));
+            // 分析对应的java类型
+            bo.setJavaType(MysqlUtil.analyzeColumnName(po.getDataType()));
+            // 分析对应所在的java包
+            bo.setJavaPackage(MysqlUtil.analyzeColumnJavaPackage(po.getDataType()));
+            // 分析mybatis字段类型
+            bo.setJdbcType(MysqlUtil.analyzeColumnJdbcType(po.getDataType()));
+            bo.setJdbcName(po.getColumnName());
+            // 注释
+            bo.setComment(po.getColumnComment());
+            // 分析是否属于java.lang的包
+            if (bo.getJavaPackage().indexOf("java.lang") < 0){
+                importJavaPackage.add(bo.getJavaPackage());
+            }
+
+            List<String> rsList = new ArrayList<>();
+            // 分析是否要注解
+            if (CREATE_TIME.equals(bo.getJdbcName())) {
+                // 创建时间 注解
+//                rsList.add("@TableField(value = \"create_time\", fill = FieldFill.INSERT)");
+//                rsList.add("@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)");
+                rsList.add("@JsonFormat(pattern = \"yyyy-MM-dd HH:mm:ss\",timezone=\"GMT+8\")");
+
+//                importJavaPackage.add("com.baomidou.mybatisplus.annotation.*");
+//                importJavaPackage.add("org.springframework.format.annotation.DateTimeFormat");
+                importJavaPackage.add("com.fasterxml.jackson.annotation.JsonFormat");
+
+
+            } else if (UPDATE_TIME.equals(bo.getJdbcName())) {
+                // 修改时间
+//                rsList.add("@TableField(value = \"create_time\", fill = FieldFill.UPDATE)");
+//                rsList.add("@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)");
+                rsList.add("@JsonFormat(pattern = \"yyyy-MM-dd HH:mm:ss\",timezone=\"GMT+8\")");
+
+//                importJavaPackage.add("com.baomidou.mybatisplus.annotation.*");
+//                importJavaPackage.add("org.springframework.format.annotation.DateTimeFormat");
+                importJavaPackage.add("com.fasterxml.jackson.annotation.JsonFormat");
+
+            } else if (IS_DELETE.equals(bo.getJdbcName())) {
+                continue;
+            }
+
+
+            bo.setRs(rsList);
+            columnBoList.add(bo);
+        }
+
+        List<String> importJavaPackageList = new ArrayList<>();
+        importJavaPackageList.addAll(importJavaPackage);
+
+        // 生成java entity 文件
+        var tpl = new JavaOutTpl();
+        // 类名
+        tpl.setClassName(commonProperty.getUpperTableName() + "Out");
+        // 包名
+        tpl.setPackageName(commonProperty.getFullPackagePath() + ".entity.out");
+        //
+        commonProperty.setJavaOutTpl(tpl);
+        // 公共配置
+        tpl.setCommonProperty(commonProperty);
+
+        tpl.setImportJavaPackage(importJavaPackageList);
+        tpl.setColumnBos(columnBoList);
+
+        // 要生成java文件所在的全相对地址
+        String fileFullName = commonProperty.getJavaPath() + "/"
+                + tpl.getPackageName().replace(".", "/") + "/" + tpl.getClassName() + ".java";
+
+        Template xmlTemplate = this.getGenConfig().getTemplate(FTL_JAVA_OUT);
+        File xmlFile = new File(fileFullName);
+        File xmlParentFile = xmlFile.getParentFile();
+        // 创建文件目录
+        if (!xmlParentFile.exists()) {
+            xmlParentFile.mkdirs();
+        }
+        // 生成base mapper xml文件
+        xmlTemplate.process(tpl, new FileWriter(xmlFile));
     }
 
     /**
@@ -144,9 +691,16 @@ public class MyPlusGenMain {
     private void genEntity() throws SQLException, ClassNotFoundException, IOException, TemplateException {
         // 获取字段属性
         List<TableSchema> list = this.getDbData(commonProperty.getUrl(), commonProperty.getDrive(), commonProperty.getUser(), commonProperty.getPassword(), commonProperty.getTableName());
+        commonProperty.setColumnList(list);
+        // 设置主键字段
+        for (TableSchema e : list) {
+            if (e.isColumnKey()) {
+                commonProperty.setColumnJavaKey(StringUtil.underlineToHump(e.getColumnName()));
+            }
+        }
 
         // 解析字段
-        List<Column> columnBoList = new ArrayList();
+        List<Column> columnBoList = new ArrayList<>();
         Set<String> importJavaPackage = new HashSet<>();
         for (TableSchema po : list) {
             var bo = new Column();
@@ -206,13 +760,14 @@ public class MyPlusGenMain {
         List<String> importJavaPackageList = new ArrayList<>();
         importJavaPackageList.addAll(importJavaPackage);
 
-        // 生成java文件
+        // 生成java entity 文件
         var tpl = new JavaTpl();
-
         // 类名
-        tpl.setFileName(commonProperty.getUpperTableName());
+        tpl.setClassName(commonProperty.getUpperTableName());
         // 包名
         tpl.setPackageName(commonProperty.getFullPackagePath() + ".entity");
+        // 保存类信息
+        commonProperty.setJavaTpl(tpl);
         // 公共配置
         tpl.setCommonProperty(commonProperty);
 
@@ -221,7 +776,7 @@ public class MyPlusGenMain {
 
         // 要生成java文件所在的全相对地址
         String fileFullName = commonProperty.getJavaPath() + "/"
-                + tpl.getPackageName().replace(".", "/") + "/" + tpl.getFileName() + ".java";
+                + tpl.getPackageName().replace(".", "/") + "/" + tpl.getClassName() + ".java";
 
         Template xmlTemplate = this.getGenConfig().getTemplate(FTL_JAVA);
         File xmlFile = new File(fileFullName);
@@ -249,6 +804,9 @@ public class MyPlusGenMain {
         // 实体包
         importJavaPackage.add(commonProperty.getFullPackagePath() + ".entity" + "." + commonProperty.getUpperTableName() );
         tpl.setImportJavaPackage(importJavaPackage);
+
+        //
+        commonProperty.setMapperTpl(tpl);
         // 公共属性
         tpl.setCommonProperty(commonProperty);
         // 类名

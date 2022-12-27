@@ -12,7 +12,7 @@ import java.util.List;
  */
 @Getter
 @Setter
-public class JavaOutTpl {
+public class JavaPageInTpl {
     /**
      * 文件名
      */
@@ -22,6 +22,11 @@ public class JavaOutTpl {
      * 包名
      */
     private String packageName;
+
+    /**
+     * 父类
+     */
+    private String fatherName;
 
     /**
      * 需要导入的java包

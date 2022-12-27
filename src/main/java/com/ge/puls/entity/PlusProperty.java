@@ -3,6 +3,8 @@ package com.ge.puls.entity;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Setter
 @Getter
 public class PlusProperty {
@@ -86,4 +88,95 @@ public class PlusProperty {
      * 首字母大写
      */
     private String upperTableName;
+
+    //字段信息
+    /**
+     * 字段集合
+     */
+    private List<TableSchema> columnList;
+    /**
+     * 字段主键
+     */
+    private String columnJavaKey;
+
+    // 入参类配置
+    /**
+     * In java继承的类
+     */
+    private String inFatherPageClass;
+
+    /**
+     * In java继承的类
+     */
+    private String inFatherPageClassPackage;
+
+    /**
+     * In java继承的类
+     */
+    private String inFatherClass;
+
+    /**
+     * In java继承的类
+     */
+    private String inFatherClassPackage;
+
+    // service配置
+    /**
+     * vo
+     */
+    private String vo;
+    /**
+     * 实体vo包
+     */
+    private String voPackage;
+    /**
+     * 实体分页vo
+     */
+    private String pageVo;
+    /**
+     * 实体分页vo包
+     */
+    private String pageVoPackage;
+    /**
+     * service 继承类
+     */
+    private String serviceFatherName;
+    /**
+     * service 继承包
+     */
+    private String serviceFatherNamePackage;
+    /**
+     * impl 继承类
+     */
+    private String implFatherName;
+    /**
+     * impl 继承包
+     */
+    private String implFatherNamePackage;
+
+    // tel类
+    // java生成信息
+    private JavaTpl javaTpl;
+
+    // mapper tel
+    private MapperTpl mapperTpl;
+
+    // java in 生成信息
+    private JavaPageInTpl javaInTpl;
+
+    // java in 生成信息
+    private JavaOutTpl javaOutTpl;
+
+    // java page in生成信息
+    private JavaPageInTpl javaPageInTpl;
+
+    // java page in生成信息
+    private JavaServiceTpl javaServiceTpl;
+
+    // java page in生成信息
+    private JavaImplTpl javaImplTpl;
+
+    // java page in生成信息
+    private JavaControllerTpl javaControllerTpl;
+
 }

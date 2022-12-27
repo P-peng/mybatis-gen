@@ -18,7 +18,7 @@ public class JavaTpl {
     /**
      * 文件名
      */
-    private String fileName;
+    private String className;
 
     /**
      * 包名

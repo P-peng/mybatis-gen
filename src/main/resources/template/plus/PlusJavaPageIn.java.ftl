@@ -16,7 +16,7 @@ import ${javapackage};
  */
 @Getter
 @Setter
-public class ${className} implements Serializable {
+public class ${className} extends ${fatherName} implements Serializable {
 
     private static final long serialVersionUID = 19970718L;
     <#list columnBos as columnBo>

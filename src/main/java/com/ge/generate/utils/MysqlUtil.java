@@ -2,6 +2,7 @@ package com.ge.generate.utils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -15,7 +16,7 @@ public class MysqlUtil {
     /**
      *  mysql字段对应java包装类
      */
-    private static final Map<String, JavaColumn> MYSQL_MAPPING_JAVA_MAP = new HashMap<String, JavaColumn>(32){{
+    private static final Map<String, JavaColumn> MYSQL_MAPPING_JAVA_MAP = new HashMap<>(32){{
         put("int", new JavaColumn("Integer", Integer.class.getName(), "INTEGER"));
         put("tinyint", new JavaColumn("Integer", Integer.class.getName(), "INTEGER"));
         put("char", new JavaColumn("String", String.class.getName(), "CHAR"));
@@ -26,7 +27,7 @@ public class MysqlUtil {
         put("float", new JavaColumn("Float", Float.class.getName(), "REAL"));
         put("double",  new JavaColumn("Double", Double.class.getName(), "DOUBLE"));
         put("decimal", new JavaColumn("BigDecimal", BigDecimal.class.getName(), "DECIMAL"));
-        put("datetime", new JavaColumn("Date", Date.class.getName(), "TIMESTAMP"));
+        put("datetime", new JavaColumn("LocalDateTime", LocalDateTime.class.getName(), "TIMESTAMP"));
         put("date",  new JavaColumn("Date", Date.class.getName(), "TIMESTAMP"));
         put("timestamp",  new JavaColumn("Date", Date.class.getName(), "TIMESTAMP"));
         put("json", new JavaColumn("String", String.class.getName(), "json"));
