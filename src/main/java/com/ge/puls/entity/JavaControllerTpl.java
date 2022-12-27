@@ -29,6 +29,11 @@ public class JavaControllerTpl {
     private List<String> importJavaPackage;
 
     /**
+     * 表注释
+     */
+    private String tableComment;
+
+    /**
      * 文件名
      */
     private String className;
@@ -67,6 +72,18 @@ public class JavaControllerTpl {
      * 入参
      */
     private String inName;
+
+    /**
+     * serviceName
+     */
+    private String serviceName;
+
+    /**
+     * serviceName 首字母小写
+     */
+    private String serviceNameLower;
+
+
 
 
 }

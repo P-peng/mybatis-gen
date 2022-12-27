@@ -18,5 +18,13 @@ public class DBUtil {
         connection = DriverManager.getConnection(url, user, password);
         return connection;
     }
+
+    public static Connection getConnection() throws Exception {
+        // 获取数据库连接
+        if (connection == null) {
+            throw new RuntimeException("无连接");
+        }
+        return connection;
+    }
 }
 

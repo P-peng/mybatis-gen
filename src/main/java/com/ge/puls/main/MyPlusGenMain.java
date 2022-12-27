@@ -67,10 +67,16 @@ public class MyPlusGenMain {
         var moduleName = "ge";
 
         // 数据库信息
+//        var drive = "com.mysql.jdbc.Driver";
+//        var url = "jdbc:mysql://120.55.162.42:3306/ge?useSSL=false";
+//        var user = "root";
+//        var password = "Lv123456+";
+
+        // 数据库信息
         var drive = "com.mysql.jdbc.Driver";
-        var url = "jdbc:mysql://120.55.162.42:3306/ge?useSSL=false";
+        var url = "jdbc:mysql://127.0.0.1:3306/ge?useSSL=false";
         var user = "root";
-        var password = "Lv123456+";
+        var password = "";
 
         // 公共配置
         var author = "dengzhipeng";
@@ -142,7 +148,7 @@ public class MyPlusGenMain {
         commonProperty.setImplFatherNamePackage(implFatherNamePackage);
 
         var main = new MyPlusGenMain();
-        main.commonProperty = commonProperty;
+        main.setCommonProperty(commonProperty);
         main.run();
 
     }
@@ -155,7 +161,8 @@ public class MyPlusGenMain {
             commonProperty.setFullPackagePath(commonProperty.getPackagePath() + "." + commonProperty.getModuleName());
         }
         // 表名字转换
-        commonProperty.setHumpTableName(StringUtil.underlineToHumpAndFirstToUpper(commonProperty.getTableName()));
+//        commonProperty.setHumpTableName(StringUtil.underlineToHumpAndFirstToUpper(commonProperty.getTableName()));
+        commonProperty.setHumpTableName(StringUtil.underlineToHump(commonProperty.getTableName()));
         commonProperty.setUpperTableName(StringUtil.toUpperCaseFirstOne(commonProperty.getHumpTableName()));
     }
 
@@ -165,8 +172,6 @@ public class MyPlusGenMain {
             System.out.println("配置为空");
             return;
         }
-
-
 
         /** 生成 entity文件 start **/
         this.genEntity();
@@ -224,14 +229,14 @@ public class MyPlusGenMain {
         // 包名
         tpl.setPackageName(commonProperty.getFullPackagePath() + ".controller");
         // 类名
-        tpl.setClassName( "I" + commonProperty.getUpperTableName() + "Controller");
+        tpl.setClassName(commonProperty.getUpperTableName() + "Controller");
 
         // 父类
-        tpl.setFatherName(commonProperty.getServiceFatherName());
-        importJavaPackageList.add(commonProperty.getServiceFatherNamePackage());
+//        tpl.setFatherName(commonProperty.getServiceFatherName());
+//        importJavaPackageList.add(commonProperty.getServiceFatherNamePackage());
         // 泛形
-        tpl.setEntityName(commonProperty.getJavaTpl().getClassName());
-        importJavaPackageList.add(commonProperty.getJavaTpl().getPackageName()+ "." + commonProperty.getJavaTpl().getClassName());
+//        tpl.setEntityName(commonProperty.getJavaTpl().getClassName());
+//        importJavaPackageList.add(commonProperty.getJavaTpl().getPackageName()+ "." + commonProperty.getJavaTpl().getClassName());
         // vo实体
         tpl.setVo(commonProperty.getVo());
         importJavaPackageList.add(commonProperty.getVoPackage());
@@ -247,7 +252,12 @@ public class MyPlusGenMain {
         // 入参实体
         tpl.setInName(commonProperty.getJavaInTpl().getClassName());
         importJavaPackageList.add(commonProperty.getJavaInTpl().getPackageName()+ "." + commonProperty.getJavaInTpl().getClassName());
-        // 引包
+        // service
+        tpl.setServiceName(commonProperty.getJavaServiceTpl().getClassName());
+        importJavaPackageList.add(commonProperty.getJavaServiceTpl().getPackageName()+ "." + commonProperty.getJavaServiceTpl().getClassName());
+        tpl.setServiceNameLower(StringUtil.toLowerCaseFirstOne(commonProperty.getJavaServiceTpl().getClassName()));
+        // 表注释
+        tpl.setTableComment(commonProperty.getTableComment());
 
         // 保存类信息
         commonProperty.setJavaControllerTpl(tpl);
@@ -688,11 +698,13 @@ public class MyPlusGenMain {
     /**
      * 生成 entity文件
      */
-    private void genEntity() throws SQLException, ClassNotFoundException, IOException, TemplateException {
+    private void genEntity() throws Exception {
         // 获取字段属性
         List<TableSchema> list = this.getDbData(commonProperty.getUrl(), commonProperty.getDrive(), commonProperty.getUser(), commonProperty.getPassword(), commonProperty.getTableName());
         commonProperty.setColumnList(list);
         // 设置主键字段
+        commonProperty.setTableComment(this.getTableComment(commonProperty.getTableName()));
+
         for (TableSchema e : list) {
             if (e.isColumnKey()) {
                 commonProperty.setColumnJavaKey(StringUtil.underlineToHump(e.getColumnName()));
@@ -725,22 +737,22 @@ public class MyPlusGenMain {
             if (CREATE_TIME.equals(bo.getJdbcName())) {
                 // 创建时间 注解
                 rsList.add("@TableField(value = \"create_time\", fill = FieldFill.INSERT)");
-                rsList.add("@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)");
-                rsList.add("@JsonFormat(pattern = \"yyyy-MM-dd HH:mm:ss\",timezone=\"GMT+8\")");
+//                rsList.add("@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)");
+//                rsList.add("@JsonFormat(pattern = \"yyyy-MM-dd HH:mm:ss\",timezone=\"GMT+8\")");
 
                 importJavaPackage.add("com.baomidou.mybatisplus.annotation.*");
-                importJavaPackage.add("com.fasterxml.jackson.annotation.JsonFormat");
-                importJavaPackage.add("org.springframework.format.annotation.DateTimeFormat");
+//                importJavaPackage.add("org.springframework.format.annotation.DateTimeFormat");
+//                importJavaPackage.add("com.fasterxml.jackson.annotation.JsonFormat");
 
             } else if (UPDATE_TIME.equals(bo.getJdbcName())) {
                 // 修改时间
                 rsList.add("@TableField(value = \"create_time\", fill = FieldFill.UPDATE)");
-                rsList.add("@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)");
-                rsList.add("@JsonFormat(pattern = \"yyyy-MM-dd HH:mm:ss\",timezone=\"GMT+8\")");
+//                rsList.add("@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)");
+//                rsList.add("@JsonFormat(pattern = \"yyyy-MM-dd HH:mm:ss\",timezone=\"GMT+8\")");
 
                 importJavaPackage.add("com.baomidou.mybatisplus.annotation.*");
-                importJavaPackage.add("com.fasterxml.jackson.annotation.JsonFormat");
-                importJavaPackage.add("org.springframework.format.annotation.DateTimeFormat");
+//                importJavaPackage.add("org.springframework.format.annotation.DateTimeFormat");
+//                importJavaPackage.add("com.fasterxml.jackson.annotation.JsonFormat");
             } else if (IS_DELETE.equals(bo.getJdbcName())) {
                 // 删除标记
                 rsList.add("@TableLogic(value = \"" + UN_DELETE +"\", delval = \"" + DELETE_VAL + "\")");
@@ -891,6 +903,22 @@ public class MyPlusGenMain {
             list.add(po);
         }
         return list;
+    }
+
+    private String getTableComment(String tableName) throws Exception {
+        // 查询sql
+        String sql = "select TABLE_NAME,TABLE_COMMENT from INFORMATION_SCHEMA.Tables WHERE  table_schema = ?";
+
+        PreparedStatement preparedStatement = DBUtil.getConnection().prepareStatement(sql);
+        preparedStatement.setString(1, tableName);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        // 不能把student在循环外面创建，要不list里面六个对象都是一样的，都是最后一个的值，
+        // 因为list add进去的都是引用
+
+        while (resultSet.next()) {
+            return resultSet.getString(2);
+        }
+        return null;
     }
 
     private Configuration getGenConfig() {

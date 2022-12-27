@@ -18,33 +18,33 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/${commonProperty.moduleName}/${commonProperty.humpTableName}")
-@Api(tags = "NEW-溯源管理")
+@Api(tags = "${tableComment}")
 public class ${className} {
 
     @Autowired
-    private IFrontTraceService iFrontTraceService;
+    private ${serviceName} ${serviceNameLower};
 
     @ApiOperation(value = "分页")
     @GetMapping("/selectPage")
     public ${vo}<${pageVo}<${pageOutName}>> selectPage(${pageInName} in) {
-        return iFrontTraceService.selectPage(in);
+        return ${serviceNameLower}.selectPage(in);
     }
 
     @ApiOperation(value = "插入")
     @PostMapping("/insertById")
     public ${vo}<Void> insertById(${inName} in) {
-        return iFrontTraceService.insertById(in);
+        return ${serviceNameLower}.insertById(in);
     }
 
     @ApiOperation(value = "修改")
     @PostMapping("/updateById")
     public ${vo}<Void> updateById(${inName} in) {
-        return iFrontTraceService.updateById(in);
+        return ${serviceNameLower}.updateById(in);
     }
 
     @ApiOperation(value = "删除")
     @PostMapping("/deleteById")
     public ${vo}<Void> deleteById(${inName} in) {
-        return iFrontTraceService.deleteById(in);
+        return ${serviceNameLower}.deleteById(in);
     }
 }

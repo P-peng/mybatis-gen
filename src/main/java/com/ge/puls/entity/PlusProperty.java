@@ -98,6 +98,10 @@ public class PlusProperty {
      * 字段主键
      */
     private String columnJavaKey;
+    /**
+     * 字段主键
+     */
+    private String tableComment;
 
     // 入参类配置
     /**
