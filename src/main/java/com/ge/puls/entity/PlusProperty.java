@@ -93,7 +93,10 @@ public class PlusProperty {
     /**
      * 字段集合
      */
-    private List<TableSchema> columnList;
+    private List<TableSchema> columnList;    /**
+     * 字段集合
+     */
+    private List<Column> columnBos;
     /**
      * 字段主键
      */
@@ -157,6 +160,16 @@ public class PlusProperty {
      * impl 继承包
      */
     private String implFatherNamePackage;
+
+    // wrapper包装类
+    /**
+     * wrapper包装类
+     */
+    private String wrapperName;
+    /**
+     * wrapper包装类包
+     */
+    private String wrapperNamePackage;
 
     // tel类
     // java生成信息

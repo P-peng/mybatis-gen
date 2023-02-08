@@ -17,7 +17,7 @@ public interface ${className} extends ${fatherName}<${entityName}>{
     * @param in
     * @return
     */
-    ${vo}<${pageVo}<${pageOutName}>> selectPage(${pageInName} in);
+    ${vo}<${pageVo}<${pageOutName}>> page(${pageInName} in);
 
     /**
     * 插入
@@ -25,7 +25,7 @@ public interface ${className} extends ${fatherName}<${entityName}>{
     * @param in
     * @return
     */
-    ${vo}<Void> insertById(${inName} in);
+    ${vo}<Void> add(${inName} in);
 
     /**
     * 修改
@@ -33,7 +33,7 @@ public interface ${className} extends ${fatherName}<${entityName}>{
     * @param in
     * @return
     */
-    ${vo}<Void> updateById(${inName} in);
+    ${vo}<Void> edit(${inName} in);
 
     /**
     * 删除
@@ -41,5 +41,5 @@ public interface ${className} extends ${fatherName}<${entityName}>{
     * @param in
     * @return
     */
-    ${vo}<Void> deleteById(${inName} in);
+    ${vo}<Void> del(${inName} in);
 }

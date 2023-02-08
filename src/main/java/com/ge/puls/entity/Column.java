@@ -48,4 +48,9 @@ public class Column {
      */
     private List<String> rs;
 
+    /**
+     * 字段 get Lambda
+     */
+    private String getLambda;
+
 }

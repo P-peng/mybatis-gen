@@ -84,6 +84,16 @@ public class JavaImplTpl {
      */
     private String keyFunc;
 
+    /**
+     * 表关键字函数
+     */
+    private String wrapperName;
+
+    /**
+     * 表关键字函数
+     */
+    private List<Column> columnBos;
+
 
 
 }

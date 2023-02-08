@@ -83,6 +83,16 @@ public class JavaControllerTpl {
      */
     private String serviceNameLower;
 
+    /**
+     * wrapper 类
+     */
+//    private String wrapperName;
+
+    /**
+     * wrapper 包
+     */
+//    private String wrapperNamePackage;
+
 
 
 

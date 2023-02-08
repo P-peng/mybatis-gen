@@ -18,7 +18,7 @@ import ${javapackage};
 @Setter
 public class ${className} extends ${fatherName} implements Serializable {
 
-    private static final long serialVersionUID = 19970718L;
+    private static final long serialVersionUID = 1L;
     <#list columnBos as columnBo>
 
     @ApiModelProperty(value = "${columnBo.comment}")

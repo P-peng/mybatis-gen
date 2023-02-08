@@ -67,16 +67,16 @@ public class MyPlusGenMain {
         var moduleName = "ge";
 
         // 数据库信息
-//        var drive = "com.mysql.jdbc.Driver";
-//        var url = "jdbc:mysql://120.55.162.42:3306/ge?useSSL=false";
-//        var user = "root";
-//        var password = "Lv123456+";
+        var drive = "com.mysql.jdbc.Driver";
+        var url = "jdbc:mysql://120.55.162.42:3306/ge?useSSL=false";
+        var user = "root";
+        var password = "Lv123456+";
 
         // 数据库信息
-        var drive = "com.mysql.jdbc.Driver";
-        var url = "jdbc:mysql://127.0.0.1:3306/ge?useSSL=false";
-        var user = "root";
-        var password = "";
+//        var drive = "com.mysql.jdbc.Driver";
+//        var url = "jdbc:mysql://127.0.0.1:3306/ge?useSSL=false";
+//        var user = "root";
+//        var password = "";
 
         // 公共配置
         var author = "dengzhipeng";
@@ -111,11 +111,13 @@ public class MyPlusGenMain {
         var serviceFatherName = "IService";
         // service 继承包
         var serviceFatherNamePackage = "com.baomidou.mybatisplus.extension.service.IService";
-        // service 继承类
+        // impl 继承类
         var implFatherName = "ServiceImpl";
         // service 继承包
         var implFatherNamePackage = "com.baomidou.mybatisplus.extension.service.impl.ServiceImpl";
-
+        // impl 包装类
+        var wrapperName = "MyLambdaQueryWrapper";
+        var wrapperNamePackage = "com.et.load.core.plus.mybatis.MyLambdaQueryWrapper";
 
         // 配置文件
         var commonProperty = new PlusProperty();
@@ -146,6 +148,8 @@ public class MyPlusGenMain {
         commonProperty.setServiceFatherNamePackage(serviceFatherNamePackage);
         commonProperty.setImplFatherName(implFatherName);
         commonProperty.setImplFatherNamePackage(implFatherNamePackage);
+        commonProperty.setWrapperName(wrapperName);
+        commonProperty.setWrapperNamePackage(wrapperNamePackage);
 
         var main = new MyPlusGenMain();
         main.setCommonProperty(commonProperty);
@@ -256,8 +260,14 @@ public class MyPlusGenMain {
         tpl.setServiceName(commonProperty.getJavaServiceTpl().getClassName());
         importJavaPackageList.add(commonProperty.getJavaServiceTpl().getPackageName()+ "." + commonProperty.getJavaServiceTpl().getClassName());
         tpl.setServiceNameLower(StringUtil.toLowerCaseFirstOne(commonProperty.getJavaServiceTpl().getClassName()));
+
         // 表注释
-        tpl.setTableComment(commonProperty.getTableComment());
+        if (commonProperty.getTableComment() == null || commonProperty.getTableComment().equals("")) {
+            tpl.setTableComment("");
+        } else {
+            tpl.setTableComment(commonProperty.getTableComment());
+        }
+
 
         // 保存类信息
         commonProperty.setJavaControllerTpl(tpl);
@@ -294,8 +304,8 @@ public class MyPlusGenMain {
         tpl.setClassName(commonProperty.getUpperTableName() + "ServiceImpl");
 
         // 父类
-        tpl.setFatherName(commonProperty.getServiceFatherName());
-        importJavaPackageList.add(commonProperty.getServiceFatherNamePackage());
+        tpl.setFatherName(commonProperty.getImplFatherName());
+        importJavaPackageList.add(commonProperty.getImplFatherNamePackage());
         // 泛形
         tpl.setEntityName(commonProperty.getJavaTpl().getClassName());
         importJavaPackageList.add(commonProperty.getJavaTpl().getPackageName()+ "." + commonProperty.getJavaTpl().getClassName());
@@ -320,6 +330,10 @@ public class MyPlusGenMain {
         // service
         tpl.setServiceName(commonProperty.getJavaServiceTpl().getClassName());
         importJavaPackageList.add(commonProperty.getJavaServiceTpl().getPackageName()+ "." + commonProperty.getJavaServiceTpl().getClassName());
+        // wrapper 类
+        tpl.setWrapperName(commonProperty.getWrapperName());
+        importJavaPackageList.add(commonProperty.getWrapperNamePackage());
+
         // 分页包
         importJavaPackageList.add("com.baomidou.mybatisplus.extension.plugins.pagination.Page");
         // 表关键字函数
@@ -331,6 +345,8 @@ public class MyPlusGenMain {
         tpl.setCommonProperty(commonProperty);
 
         tpl.setImportJavaPackage(importJavaPackageList);
+
+        tpl.setColumnBos(commonProperty.getColumnBos());
 
 
         // 要生成java文件所在的全相对地址
@@ -529,6 +545,8 @@ public class MyPlusGenMain {
             if (bo.getJavaPackage().indexOf("java.lang") < 0){
                 importJavaPackage.add(bo.getJavaPackage());
             }
+            // get 函数
+            bo.setGetLambda("get" + StringUtil.toUpperCaseFirstOne(bo.getJavaName()));
 
             Set<String> rsList = new HashSet<>();
             // 分析是否要注解
@@ -568,6 +586,8 @@ public class MyPlusGenMain {
             bo.setRs(rs);
             columnBoList.add(bo);
         }
+        //
+        commonProperty.setColumnBos(columnBoList);
 
         List<String> importJavaPackageList = new ArrayList<>();
         importJavaPackageList.addAll(importJavaPackage);
@@ -732,6 +752,7 @@ public class MyPlusGenMain {
                 importJavaPackage.add(bo.getJavaPackage());
             }
 
+
             List<String> rsList = new ArrayList<>();
             // 分析是否要注解
             if (CREATE_TIME.equals(bo.getJdbcName())) {
@@ -768,6 +789,8 @@ public class MyPlusGenMain {
             bo.setRs(rsList);
             columnBoList.add(bo);
         }
+        //
+//        commonProperty.setColumnBos(columnBoList);
 
         List<String> importJavaPackageList = new ArrayList<>();
         importJavaPackageList.addAll(importJavaPackage);

@@ -25,26 +25,26 @@ public class ${className} {
     private ${serviceName} ${serviceNameLower};
 
     @ApiOperation(value = "分页")
-    @GetMapping("/selectPage")
-    public ${vo}<${pageVo}<${pageOutName}>> selectPage(${pageInName} in) {
-        return ${serviceNameLower}.selectPage(in);
+    @GetMapping("/page")
+    public ${vo}<${pageVo}<${pageOutName}>> page(${pageInName} in) {
+        return ${serviceNameLower}.page(in);
     }
 
     @ApiOperation(value = "插入")
-    @PostMapping("/insertById")
-    public ${vo}<Void> insertById(${inName} in) {
-        return ${serviceNameLower}.insertById(in);
+    @PostMapping("/add")
+    public ${vo}<Void> add(${inName} in) {
+        return ${serviceNameLower}.add(in);
     }
 
     @ApiOperation(value = "修改")
-    @PostMapping("/updateById")
-    public ${vo}<Void> updateById(${inName} in) {
-        return ${serviceNameLower}.updateById(in);
+    @PostMapping("/edit")
+    public ${vo}<Void> edit(${inName} in) {
+        return ${serviceNameLower}.edit(in);
     }
 
     @ApiOperation(value = "删除")
-    @PostMapping("/deleteById")
-    public ${vo}<Void> deleteById(${inName} in) {
-        return ${serviceNameLower}.deleteById(in);
+    @PostMapping("/del")
+    public ${vo}<Void> del(${inName} in) {
+        return ${serviceNameLower}.del(in);
     }
 }

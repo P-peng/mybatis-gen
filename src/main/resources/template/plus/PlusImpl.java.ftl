@@ -19,8 +19,8 @@ import java.util.ArrayList;
 public class ${className} extends ${fatherName}<${mapperName}, ${entityName}> implements ${serviceName} {
 
     @Override
-    public ${vo}<${pageVo}<${pageOutName}>> selectPage(${pageInName} in) {
-        var vo = new ResultVo<${vo}<${pageVo}<${pageOutName}>>>();
+    public ${vo}<${pageVo}<${pageOutName}>> page(${pageInName} in) {
+        var vo = new ${vo}<${pageVo}<${pageOutName}>>();
         var ew = this.ewPage(in);
 
         var page = this.page(new Page<>(in.getPage(), in.getRows()), ew);
@@ -41,7 +41,7 @@ public class ${className} extends ${fatherName}<${mapperName}, ${entityName}> im
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public ${vo}<Void> insertById(${inName} in) {
+    public ${vo}<Void> add(${inName} in) {
         var vo = new ${vo}<Void>();
         var e = new ${entityName}();
         BeanUtils.copyProperties(in, e);
@@ -51,7 +51,7 @@ public class ${className} extends ${fatherName}<${mapperName}, ${entityName}> im
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public ${vo}<Void> updateById(${inName} in) {
+    public ${vo}<Void> edit(${inName} in) {
         var vo = new ${vo}<Void>();
         var e = new ${entityName}();
         BeanUtils.copyProperties(in, e);
@@ -61,9 +61,17 @@ public class ${className} extends ${fatherName}<${mapperName}, ${entityName}> im
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public ${vo}<Void> deleteById(${inName} in) {
+    public ${vo}<Void> del(${inName} in) {
         var vo = new ${vo}<Void>();
         this.removeById(in.${keyFunc});
         return vo;
+    }
+
+    private ${wrapperName}<${entityName}> ewPage(${pageInName} in) {
+        var ew = new ${wrapperName}<${entityName}>();
+        <#list columnBos as columnBo>
+        ew.eq(${entityName}::${columnBo.getLambda}, in.${columnBo.getLambda}());
+        </#list>
+        return ew;
     }
 }

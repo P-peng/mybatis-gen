@@ -17,7 +17,7 @@ import ${javapackage};
 @Setter
 public class ${className} implements Serializable {
 
-    private static final long serialVersionUID = 19970718L;
+    private static final long serialVersionUID = 1L;
     <#list columnBos as columnBo>
 
     /** ${columnBo.comment} */
