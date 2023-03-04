@@ -30,6 +30,11 @@ public class PlusProperty {
     private String password;
 
     /**
+     * 数据库名
+     */
+    private String dbName;
+
+    /**
      * 表名
      */
     private String tableName;

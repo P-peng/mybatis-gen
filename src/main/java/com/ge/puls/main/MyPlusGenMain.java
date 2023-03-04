@@ -21,6 +21,8 @@ import java.sql.SQLException;
 import java.sql.SQLOutput;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MyPlusGenMain {
 
@@ -62,24 +64,26 @@ public class MyPlusGenMain {
     }
 
     public static void main(String[] args) throws Exception {
-        // 单表
-        var tableName = "ge";
+//        // 单表
+        var tableName = "front_car";
         var moduleName = "ge";
-
-        // 数据库信息
+//
+//        // 数据库信息
         var drive = "com.mysql.jdbc.Driver";
-        var url = "jdbc:mysql://120.55.162.42:3306/ge?useSSL=false";
+        var url = "jdbc:mysql://120.77.152.4:3306/insure_dev?serverTimezone=Asia/Shanghai&characterEncoding=utf8&useUnicode=true&useSSL=false";
         var user = "root";
-        var password = "Lv123456+";
+        var password = "nts1688=8d2c3f5a608d452c8850645fe39ae2ec";
+
 
         // 数据库信息
 //        var drive = "com.mysql.jdbc.Driver";
 //        var url = "jdbc:mysql://127.0.0.1:3306/ge?useSSL=false";
 //        var user = "root";
 //        var password = "";
+//        var dbName = "";
 
         // 公共配置
-        var author = "dengzhipeng";
+        var author = "17 farmer";
         var version = "1.0";
 
         // 基础目录
@@ -113,7 +117,7 @@ public class MyPlusGenMain {
         var serviceFatherNamePackage = "com.baomidou.mybatisplus.extension.service.IService";
         // impl 继承类
         var implFatherName = "ServiceImpl";
-        // service 继承包
+        // impl 继承包
         var implFatherNamePackage = "com.baomidou.mybatisplus.extension.service.impl.ServiceImpl";
         // impl 包装类
         var wrapperName = "MyLambdaQueryWrapper";
@@ -146,6 +150,7 @@ public class MyPlusGenMain {
         commonProperty.setPageVoPackage(pageVoPackage);
         commonProperty.setServiceFatherName(serviceFatherName);
         commonProperty.setServiceFatherNamePackage(serviceFatherNamePackage);
+        // impl文件
         commonProperty.setImplFatherName(implFatherName);
         commonProperty.setImplFatherNamePackage(implFatherNamePackage);
         commonProperty.setWrapperName(wrapperName);
@@ -157,7 +162,24 @@ public class MyPlusGenMain {
 
     }
 
+    /**
+     * 根据url获取库名
+     * @param url
+     * @return
+     */
+    public  String getDbName(String url) {
+        Pattern p = Pattern.compile("jdbc:(?<db>\\w+):.*((//)|@)(?<host>.+):(?<port>\\d+)(/|(;DatabaseName=)|:)(?<dbName>\\w+)\\??.*");
+        Matcher m = p.matcher(url);
+        if(m.find()) {
+            return m.group("dbName");
+        }
+        return null;
+    }
+
     private void setProperty() {
+        // 数据库表名
+        commonProperty.setDbName(this.getDbName(commonProperty.getUrl()));
+
         // 全包名
         if (commonProperty.getModuleName() == null || commonProperty.getModuleName().isBlank()) {
             commonProperty.setFullPackagePath(commonProperty.getPackagePath());
@@ -720,15 +742,20 @@ public class MyPlusGenMain {
      */
     private void genEntity() throws Exception {
         // 获取字段属性
-        List<TableSchema> list = this.getDbData(commonProperty.getUrl(), commonProperty.getDrive(), commonProperty.getUser(), commonProperty.getPassword(), commonProperty.getTableName());
+        List<TableSchema> list = this.getDbData(commonProperty.getUrl(), commonProperty.getDrive(), commonProperty.getUser(), commonProperty.getPassword(), commonProperty.getTableName(), commonProperty.getDbName());
         commonProperty.setColumnList(list);
         // 设置主键字段
-        commonProperty.setTableComment(this.getTableComment(commonProperty.getTableName()));
+        commonProperty.setTableComment(this.getTableComment(commonProperty.getTableName(), commonProperty.getDbName()));
 
         for (TableSchema e : list) {
             if (e.isColumnKey()) {
                 commonProperty.setColumnJavaKey(StringUtil.underlineToHump(e.getColumnName()));
             }
+        }
+
+        if (commonProperty.getColumnJavaKey() == null || commonProperty.getColumnJavaKey().equals("")) {
+            throw new RuntimeException("表没有关键字");
+
         }
 
         // 解析字段
@@ -902,12 +929,13 @@ public class MyPlusGenMain {
      * @param password
      * @return
      */
-    private List<TableSchema> getDbData(String url, String drive, String user, String password, String tableName) throws SQLException, ClassNotFoundException {
+    private List<TableSchema> getDbData(String url, String drive, String user, String password, String tableName, String dbName) throws SQLException, ClassNotFoundException {
         // 查询sql
-        String sql = "select `data_type`, `column_name`, `column_comment`, `column_key` FROM information_schema.columns where table_name = ?";
+        String sql = "select `data_type`, `column_name`, `column_comment`, `column_key` FROM information_schema.columns where `table_name` = ? and `table_schema` = ? ORDER BY ORDINAL_POSITION asc";
 
         PreparedStatement preparedStatement = DBUtil.getConnection(drive, url, user, password).prepareStatement(sql);
         preparedStatement.setString(1, tableName);
+        preparedStatement.setString(2, dbName);
         ResultSet resultSet = preparedStatement.executeQuery();
         // 不能把student在循环外面创建，要不list里面六个对象都是一样的，都是最后一个的值，
         // 因为list add进去的都是引用
@@ -919,7 +947,7 @@ public class MyPlusGenMain {
 
             po.setColumnComment(resultSet.getString(3));
 
-            if (resultSet.getString(4) != null && !resultSet.getString(4).equals("") && !resultSet.getString(3).isBlank()) {
+            if (resultSet.getString(4) != null && !resultSet.getString(4).equals("") ) {
                 po.setColumnKey(true);
             }
 
@@ -928,12 +956,13 @@ public class MyPlusGenMain {
         return list;
     }
 
-    private String getTableComment(String tableName) throws Exception {
+    private String getTableComment(String tableName, String dbName) throws Exception {
         // 查询sql
-        String sql = "select TABLE_NAME,TABLE_COMMENT from INFORMATION_SCHEMA.Tables WHERE  table_schema = ?";
+        String sql = "select TABLE_NAME,TABLE_COMMENT from INFORMATION_SCHEMA.Tables WHERE  `table_name` = ? and `table_schema` = ?";
 
         PreparedStatement preparedStatement = DBUtil.getConnection().prepareStatement(sql);
         preparedStatement.setString(1, tableName);
+        preparedStatement.setString(2, dbName);
         ResultSet resultSet = preparedStatement.executeQuery();
         // 不能把student在循环外面创建，要不list里面六个对象都是一样的，都是最后一个的值，
         // 因为list add进去的都是引用

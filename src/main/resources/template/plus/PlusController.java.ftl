@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
+ * ${tableComment}
+ *
  * @author ${commonProperty.author}
  * @date ${commonProperty.date}
  * @version ${commonProperty.version}
@@ -30,7 +32,7 @@ public class ${className} {
         return ${serviceNameLower}.page(in);
     }
 
-    @ApiOperation(value = "插入")
+    @ApiOperation(value = "新增")
     @PostMapping("/add")
     public ${vo}<Void> add(${inName} in) {
         return ${serviceNameLower}.add(in);
